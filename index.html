@@ -214,19 +214,20 @@
     .jar-exp .jar-lid  { background: var(--bee-yellow); }
     .jar-exp .jar-neck { border-color: var(--bee-dark); }
     .jar-exp .jar-body { border-color: var(--bee-dark); border-width: 4px; }
-    .jar-exp .jar-fill { background: linear-gradient(to top, #B87800, #FFD93D 55%, #FFF4A0); }
+    .jar-exp .jar-fill  { background: rgba(255, 210, 50, 0.18); }
     .jar-exp .wave { display: none; }
     /* Free money jar — dollar bills scattered (PuppyCat) */
     .jar-free .jar-lid  { background: var(--puppy-pink); }
     .jar-free .jar-neck { border-color: var(--puppy-purple); }
     .jar-free .jar-body { border-color: var(--puppy-purple); border-width: 4px; }
-    .jar-free .jar-fill { background: linear-gradient(to top, #5B3090, #bb8ac2 55%, #F0E5F8); }
+    .jar-free .jar-fill { background: rgba(180, 130, 220, 0.18); }
     .jar-free .wave { display: none; }
     .jar-exp  .jar-pill { background: #FFF4A0; color: #3D2000; }
     .jar-free .jar-pill { background: var(--primary-light); color: var(--puppy-purple); }
     .jar-decor {
       position: absolute; pointer-events: none; user-select: none;
-      opacity: 0.90; z-index: 2; line-height: 1;
+      opacity: 0; z-index: 3; line-height: 1;
+      transition: opacity 0.45s ease, transform 0.35s cubic-bezier(.34,1.56,.64,1);
     }
     .btn-blue-full {
       background: linear-gradient(135deg, #71a1c5, #9bc5e0); color: #fff;
@@ -1042,22 +1043,25 @@ function renderPersonalLog() {
 }
 
 function populateJarDecor() {
-  const configs = [
-    { id: 'j1-fill', items: ['🪙','🪙','💰','⭐','🪙','✨','🪙','💫'] },
-    { id: 'j2-fill', items: ['💵','💵','💜','✨','💵','🌟','💵','⭐'] },
-  ];
-  configs.forEach(({ id, items }) => {
-    const fill = document.getElementById(id);
-    fill.querySelectorAll('.jar-decor').forEach(e => e.remove());
-    for (let i = 0; i < 18; i++) {
-      const el = document.createElement('span');
-      el.className = 'jar-decor';
-      el.textContent = items[i % items.length];
-      el.style.fontSize  = (10 + Math.random() * 14) + 'px';
-      el.style.left      = (2 + Math.random() * 88) + '%';
-      el.style.bottom    = (1 + Math.random() * 94) + '%';
-      el.style.transform = `rotate(${-100 + Math.random() * 200}deg)`;
-      fill.appendChild(el);
+  [
+    { fillId: 'j1-fill', symbols: ['🪙','🪙','🪙','💵','🪙','🪙'] },
+    { fillId: 'j2-fill', symbols: ['💵','🪙','💵','💵','🪙','💵'] },
+  ].forEach(({ fillId, symbols }) => {
+    const jarBody = document.getElementById(fillId).parentElement;
+    jarBody.querySelectorAll('.jar-decor').forEach(e => e.remove());
+    for (let i = 0; i < 24; i++) {
+      const el  = document.createElement('span');
+      el.className   = 'jar-decor';
+      el.textContent = symbols[i % symbols.length];
+      const level    = 2 + Math.random() * 94;
+      const rotation = (-120 + Math.random() * 240).toFixed(1);
+      el.style.fontSize  = (11 + Math.random() * 12) + 'px';
+      el.style.left      = (3  + Math.random() * 82) + '%';
+      el.style.bottom    = level + '%';
+      el.style.transform = `rotate(${rotation}deg) scale(0.4)`;
+      el.dataset.level    = level;
+      el.dataset.rotation = rotation;
+      jarBody.appendChild(el);
     }
   });
 }
@@ -1131,7 +1135,14 @@ function checkMilestones(jarEl, prev, curr, key) {
 }
 
 function setFill(id, pct) {
-  document.getElementById(id).style.height = `${pct}%`;
+  const fillEl  = document.getElementById(id);
+  fillEl.style.height = `${pct}%`;
+  const jarBody = fillEl.parentElement;
+  jarBody.querySelectorAll('.jar-decor').forEach(el => {
+    const show = pct >= parseFloat(el.dataset.level);
+    el.style.opacity   = show ? '0.92' : '0';
+    el.style.transform = `rotate(${el.dataset.rotation}deg) scale(${show ? 1 : 0.4})`;
+  });
 }
 
 function refreshIncome() {
@@ -1229,7 +1240,7 @@ function soundMilestone() {
 function spawnCoins(jarEl, count = 3) {
   const body = jarEl.querySelector('.jar-body');
   const isFree = jarEl.classList.contains('jar-free');
-  const symbols = isFree ? ['💵','💵','✨','💜'] : ['🪙','🪙','⭐','🪙'];
+  const symbols = isFree ? ['💵','🪙','💵'] : ['🪙','🪙','🪙'];
   for (let i = 0; i < count; i++) {
     const el = document.createElement('span');
     el.className = 'coin-particle';

@@ -214,32 +214,19 @@
     .jar-exp .jar-lid  { background: var(--bee-yellow); }
     .jar-exp .jar-neck { border-color: var(--bee-dark); }
     .jar-exp .jar-body { border-color: var(--bee-dark); border-width: 4px; }
-    .jar-exp .jar-fill  { background: rgba(255, 210, 50, 0.18); }
+    .jar-exp .jar-fill { background: linear-gradient(to top, #B87800, #FFD93D 55%, #FFF4A0); }
     .jar-exp .wave { display: none; }
     /* Free money jar — dollar bills scattered (PuppyCat) */
     .jar-free .jar-lid  { background: var(--puppy-pink); }
     .jar-free .jar-neck { border-color: var(--puppy-purple); }
     .jar-free .jar-body { border-color: var(--puppy-purple); border-width: 4px; }
-    .jar-free .jar-fill { background: rgba(180, 130, 220, 0.18); }
+    .jar-free .jar-fill { background: linear-gradient(to top, #5B3090, #bb8ac2 55%, #F0E5F8); }
     .jar-free .wave { display: none; }
     .jar-exp  .jar-pill { background: #FFF4A0; color: #3D2000; }
     .jar-free .jar-pill { background: var(--primary-light); color: var(--puppy-purple); }
     .jar-decor {
       position: absolute; pointer-events: none; user-select: none;
-      opacity: 0; z-index: 3;
-      transition: opacity 0.45s ease, transform 0.35s cubic-bezier(.34,1.56,.64,1);
-    }
-    .jar-coin {
-      width: 17px; height: 17px; border-radius: 50%;
-      background: radial-gradient(circle at 38% 35%, #FFF4A0, #FFD700 48%, #C8960A 78%, #9A6B00);
-      border: 2px solid #7A5000;
-      box-shadow: inset -1px -1px 3px rgba(0,0,0,.2), inset 1px 1px 2px rgba(255,255,255,.5);
-    }
-    .jar-bill {
-      width: 22px; height: 10px; border-radius: 3px;
-      background: linear-gradient(150deg, #E0C8F8, #C4A0DC 55%, #A87ACC);
-      border: 1.5px solid #8B5BA0;
-      box-shadow: 0 1px 3px rgba(0,0,0,.12);
+      opacity: 0.90; z-index: 2; line-height: 1;
     }
     .btn-blue-full {
       background: linear-gradient(135deg, #71a1c5, #9bc5e0); color: #fff;
@@ -287,11 +274,7 @@
     .jar-card { transition: transform .15s; }
     .jar-bounce { animation: jar-bounce .55s cubic-bezier(.34,1.56,.64,1); }
     .coin-particle {
-      position: absolute; pointer-events: none; z-index: 10;
-      width: 18px; height: 18px; border-radius: 50%;
-      background: radial-gradient(circle at 38% 35%, #FFF4A0, #FFD700 48%, #C8960A 78%, #9A6B00);
-      border: 2px solid #7A5000;
-      box-shadow: inset -1px -1px 3px rgba(0,0,0,.2), inset 1px 1px 2px rgba(255,255,255,.5);
+      position: absolute; font-size: 26px; pointer-events: none; z-index: 10;
       animation: coin-fall .8s ease-in forwards;
       transform-style: preserve-3d;
     }
@@ -1059,24 +1042,22 @@ function renderPersonalLog() {
 }
 
 function populateJarDecor() {
-  [
-    { fillId: 'j1-fill', types: ['coin','coin','coin','bill','coin','coin'] },
-    { fillId: 'j2-fill', types: ['bill','coin','bill','bill','coin','bill'] },
-  ].forEach(({ fillId, types }) => {
-    const jarBody = document.getElementById(fillId).parentElement;
-    jarBody.querySelectorAll('.jar-decor').forEach(e => e.remove());
-    for (let i = 0; i < 24; i++) {
-      const type     = types[i % types.length];
-      const el       = document.createElement('div');
-      const level    = 2 + Math.random() * 94;
-      const rotation = (-120 + Math.random() * 240).toFixed(1);
-      el.className   = `jar-decor jar-${type}`;
-      el.style.left      = (3  + Math.random() * 80) + '%';
-      el.style.bottom    = level + '%';
-      el.style.transform = `rotate(${rotation}deg) scale(0.4)`;
-      el.dataset.level    = level;
-      el.dataset.rotation = rotation;
-      jarBody.appendChild(el);
+  const configs = [
+    { id: 'j1-fill', items: ['🪙','🪙','💰','⭐','🪙','✨','🪙','💫'] },
+    { id: 'j2-fill', items: ['💵','💵','💜','✨','💵','🌟','💵','⭐'] },
+  ];
+  configs.forEach(({ id, items }) => {
+    const fill = document.getElementById(id);
+    fill.querySelectorAll('.jar-decor').forEach(e => e.remove());
+    for (let i = 0; i < 18; i++) {
+      const el = document.createElement('span');
+      el.className = 'jar-decor';
+      el.textContent = items[i % items.length];
+      el.style.fontSize  = (10 + Math.random() * 14) + 'px';
+      el.style.left      = (2 + Math.random() * 88) + '%';
+      el.style.bottom    = (1 + Math.random() * 94) + '%';
+      el.style.transform = `rotate(${-100 + Math.random() * 200}deg)`;
+      fill.appendChild(el);
     }
   });
 }
@@ -1150,14 +1131,7 @@ function checkMilestones(jarEl, prev, curr, key) {
 }
 
 function setFill(id, pct) {
-  const fillEl  = document.getElementById(id);
-  fillEl.style.height = `${pct}%`;
-  const jarBody = fillEl.parentElement;
-  jarBody.querySelectorAll('.jar-decor').forEach(el => {
-    const show = pct >= parseFloat(el.dataset.level);
-    el.style.opacity   = show ? '0.92' : '0';
-    el.style.transform = `rotate(${el.dataset.rotation}deg) scale(${show ? 1 : 0.4})`;
-  });
+  document.getElementById(id).style.height = `${pct}%`;
 }
 
 function refreshIncome() {
@@ -1254,9 +1228,12 @@ function soundMilestone() {
 // ── Particle helpers ─────────────────────────────────────────
 function spawnCoins(jarEl, count = 3) {
   const body = jarEl.querySelector('.jar-body');
+  const isFree = jarEl.classList.contains('jar-free');
+  const symbols = isFree ? ['💵','💵','✨','💜'] : ['🪙','🪙','⭐','🪙'];
   for (let i = 0; i < count; i++) {
-    const el = document.createElement('div');
+    const el = document.createElement('span');
     el.className = 'coin-particle';
+    el.textContent = symbols[i % symbols.length];
     el.style.left = (10 + Math.random() * 70) + '%';
     el.style.top = '-10px';
     el.style.animationDelay = (i * 0.11) + 's';

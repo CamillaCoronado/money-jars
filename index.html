@@ -9,19 +9,24 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #F0EDFF;
+      --bg: #FFFBF0;
       --surface: #FFFFFF;
-      --primary: #7B61FF;
-      --primary-light: #EDE9FF;
-      --text: #111827;
-      --muted: #6B7280;
-      --border: #E5E7EB;
+      --primary: #8B6FD4;
+      --primary-light: #F0EAFF;
+      --text: #2D1F00;
+      --muted: #8B7355;
+      --border: #E8D8A0;
       --green: #059669;
       --green-light: #D1FAE5;
       --orange: #F97316;
       --orange-light: #FFF0E6;
+      --bee-yellow: #FFD93D;
+      --bee-dark: #2D1F00;
+      --bee-light: #FFFBDC;
+      --puppy-pink: #F9A8D4;
+      --puppy-lavender: #C4B5FD;
       --r: 20px;
-      --shadow: 0 2px 16px rgba(123,97,255,0.08);
+      --shadow: 0 2px 16px rgba(139,111,212,0.10);
     }
 
     body {
@@ -83,7 +88,8 @@
     .header { text-align: center; margin-bottom: 28px; }
     .badge {
       display: inline-flex; align-items: center; gap: 6px;
-      background: var(--primary-light); color: var(--primary);
+      background: var(--bee-light); color: #9A6B00;
+      border: 2px solid var(--bee-yellow);
       font-size: 12px; font-weight: 700; letter-spacing: 0.5px;
       padding: 5px 14px; border-radius: 100px; margin-bottom: 12px;
     }
@@ -141,13 +147,34 @@
     .btn-full:active { transform: translateY(0); }
     .btn-full:disabled { opacity: .35; cursor: not-allowed; transform: none; }
     .btn-purple-full {
-      background: linear-gradient(135deg, #7B61FF, #B45FE0); color: #fff;
-      box-shadow: 0 4px 16px rgba(123,97,255,.28);
+      background: linear-gradient(135deg, #8B6FD4, #C084FC); color: #fff;
+      box-shadow: 0 4px 16px rgba(139,111,212,.30);
     }
     .btn-orange-full {
       background: linear-gradient(135deg, #F97316, #FBBF24); color: #fff;
       box-shadow: 0 4px 16px rgba(249,115,22,.25);
     }
+    .btn-bee-full {
+      background: linear-gradient(135deg, #FFD93D, #FFA040); color: var(--bee-dark);
+      box-shadow: 0 4px 16px rgba(255,217,61,.35); font-weight: 800;
+    }
+    .dot-gas { background: var(--bee-yellow); border: 2px solid #9A6B00; }
+    .gas-preview-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 14px; background: var(--bee-light); border-radius: 12px;
+      margin: 10px 0; border: 2px solid var(--bee-yellow);
+    }
+    .gas-preview-lbl { font-size: 13px; font-weight: 700; color: var(--muted); }
+    .gas-preview-val { font-size: 20px; font-weight: 800; color: #9A6B00; }
+    .gas-budget-bar { height: 10px; background: var(--border); border-radius: 100px; overflow: hidden; margin-bottom: 10px; }
+    .gas-budget-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #FFD93D, #FFA040);
+      border-radius: 100px;
+      transition: width .9s cubic-bezier(.34,1.56,.64,1);
+      width: 0%;
+    }
+    .gas-budget-fill.over { background: linear-gradient(90deg, #F97316, #EF4444); }
 
     /* ── Jars ── */
     .jars-row {
@@ -180,16 +207,32 @@
       background: rgba(255,255,255,.28); border-radius: 50%;
       pointer-events: none; z-index: 3;
     }
-    .jar-exp .jar-lid  { background: #FFA866; }
-    .jar-exp .jar-neck { border-color: #FFA866; }
-    .jar-exp .jar-body { border-color: #FFA866; }
-    .jar-exp .jar-fill { background: linear-gradient(to top, #E8610F, #FFA040); }
-    .jar-exp .wave     { background: #FF8C2A; }
-    .jar-free .jar-lid  { background: #A58AFF; }
-    .jar-free .jar-neck { border-color: #A58AFF; }
-    .jar-free .jar-body { border-color: #A58AFF; }
-    .jar-free .jar-fill { background: linear-gradient(to top, #5B3FFF, #A87AFF); }
-    .jar-free .wave     { background: #7B5FFF; }
+    /* Bills jar — Bee themed */
+    .jar-exp .jar-lid  { background: var(--bee-yellow); }
+    .jar-exp .jar-neck { border-color: var(--bee-dark); }
+    .jar-exp .jar-body { border-color: var(--bee-dark); border-width: 4px; }
+    .jar-exp .jar-fill {
+      background:
+        radial-gradient(circle at 30% 60%, rgba(255,255,255,.38) 22%, transparent 24%),
+        radial-gradient(circle at 70% 40%, rgba(255,255,255,.32) 20%, transparent 22%),
+        radial-gradient(circle at 50% 80%, rgba(255,255,255,.30) 18%, transparent 20%),
+        linear-gradient(to top, #9A6B00, #D4970A 20%, #FFD93D 55%, #FFF4A8);
+      background-size: 26px 26px, 26px 26px, 26px 26px, 100% 100%;
+    }
+    .jar-exp .wave     { background: #FFC107; }
+    /* Free money jar — PuppyCat themed */
+    .jar-free .jar-lid  { background: var(--puppy-pink); }
+    .jar-free .jar-neck { border-color: var(--primary); }
+    .jar-free .jar-body { border-color: var(--primary); border-width: 4px; }
+    .jar-free .jar-fill {
+      background:
+        repeating-linear-gradient(-8deg, transparent 0, transparent 11px, rgba(255,255,255,.12) 11px, rgba(255,255,255,.12) 13px),
+        repeating-linear-gradient(82deg,  transparent 0, transparent 18px, rgba(255,255,255,.07) 18px, rgba(255,255,255,.07) 20px),
+        linear-gradient(to top, #4C2D8F, #8B6FD4 40%, #C4B5FD 75%, #EDE9FF);
+    }
+    .jar-free .wave     { background: #A78BFA; }
+    .jar-exp  .jar-pill { background: var(--bee-light); color: #9A6B00; }
+    .jar-free .jar-pill { background: var(--primary-light); color: var(--primary); }
     .jar-fill {
       position: absolute; bottom: 0; left: 0; right: 0;
       height: 0%; transition: height 1.2s cubic-bezier(.34,1.56,.64,1); z-index: 1;
@@ -251,8 +294,7 @@
       display: inline-block; font-size: 11px; font-weight: 700;
       padding: 3px 10px; border-radius: 100px; margin-top: 6px;
     }
-    .jar-exp  .jar-pill { background: var(--orange-light); color: var(--orange); }
-    .jar-free .jar-pill { background: var(--primary-light); color: var(--primary); }
+    /* pills defined with jar theme above */
 
     /* ── Card ── */
     .card {
@@ -477,6 +519,40 @@
     <div class="bills-inner" id="bills-inner"></div>
   </div>
 
+  <!-- Gas fill-up tracker -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="sec-title"><div class="dot dot-gas"></div>Log Gas Fill-up</div>
+    <div class="two-col">
+      <div class="ig" style="margin-bottom:0">
+        <div class="il">Gallons</div>
+        <div class="iw">
+          <input type="number" id="g-gal" placeholder="0.000" min="0" step="0.001" class="sp">
+          <span class="sfx">gal</span>
+        </div>
+      </div>
+      <div class="ig" style="margin-bottom:0">
+        <div class="il">Price / Gal</div>
+        <div class="iw">
+          <span class="pfx">$</span>
+          <input type="number" id="g-ppg" placeholder="0.00" min="0" step="0.01" class="pp">
+        </div>
+      </div>
+    </div>
+    <div class="gas-preview-row" id="gas-preview" style="display:none">
+      <span class="gas-preview-lbl">⛽ Total cost</span>
+      <span class="gas-preview-val" id="g-total">—</span>
+    </div>
+    <button class="btn-full btn-bee-full" id="btn-log-gas">⛽ Log Fill-up →</button>
+    <div style="margin-top:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div class="sec-title" style="margin-bottom:0"><div class="dot dot-gas"></div>Gas Budget</div>
+        <span id="gas-budget-lbl" style="font-size:12px;font-weight:700;color:var(--muted)">$0 / $161</span>
+      </div>
+      <div class="gas-budget-bar"><div class="gas-budget-fill" id="gas-budget-fill"></div></div>
+      <div id="gas-log"><div class="log-empty">No fill-ups yet</div></div>
+    </div>
+  </div>
+
   <!-- Income this month -->
   <div class="card">
     <div class="sec-title"><div class="dot"></div>Income This Month</div>
@@ -637,7 +713,7 @@ const FIXED = 644;
 
 // ── App state ────────────────────────────────────────────────
 let uid     = null;
-let S       = { bank: 0, mpg: 0, shifts: [], paychecks: [] };
+let S       = { bank: 0, mpg: 0, shifts: [], paychecks: [], gasFillups: [] };
 let preview = null;
 
 function month() {
@@ -665,10 +741,11 @@ async function loadData() {
   const mSnap = await getDoc(doc(db, 'users', uid, 'months', month()));
   if (mSnap.exists()) {
     const d = mSnap.data();
-    S.shifts    = d.shifts    || [];
-    S.paychecks = d.paychecks || [];
+    S.shifts      = d.shifts      || [];
+    S.paychecks   = d.paychecks   || [];
+    S.gasFillups  = d.gasFillups  || [];
   } else {
-    S.shifts = []; S.paychecks = [];
+    S.shifts = []; S.paychecks = []; S.gasFillups = [];
   }
 }
 
@@ -680,7 +757,7 @@ async function saveSettings() {
 async function saveMonthData() {
   if (!uid) return;
   await setDoc(doc(db, 'users', uid, 'months', month()), {
-    shifts: S.shifts, paychecks: S.paychecks,
+    shifts: S.shifts, paychecks: S.paychecks, gasFillups: S.gasFillups,
   });
 }
 
@@ -786,13 +863,62 @@ function addPaycheck() {
   toast(`💼 ${fmt(amt)} added from ${lbl}`);
 }
 
+function calcGas() {
+  const gal = +(document.getElementById('g-gal').value) || 0;
+  const ppg = +(document.getElementById('g-ppg').value) || 0;
+  const preview = document.getElementById('gas-preview');
+  if (gal > 0 && ppg > 0) {
+    document.getElementById('g-total').textContent = fmt(gal * ppg);
+    preview.style.display = 'flex';
+  } else {
+    preview.style.display = 'none';
+  }
+}
+
+function logGasFillup() {
+  const gal   = +(document.getElementById('g-gal').value) || 0;
+  const ppg   = +(document.getElementById('g-ppg').value) || 0;
+  const total = gal * ppg;
+  if (total <= 0) { toast('⚠️ Enter gallons and price first'); return; }
+  S.gasFillups.push({
+    id: Date.now(),
+    date: new Date().toLocaleDateString('en-US', { month:'short', day:'numeric' }),
+    gallons: gal, pricePer: ppg, total,
+  });
+  saveMonthData();
+  document.getElementById('g-gal').value = '';
+  document.getElementById('g-ppg').value = '';
+  document.getElementById('gas-preview').style.display = 'none';
+  renderGasLog();
+  soundCoin();
+  toast(`⛽ ${gal.toFixed(3)} gal logged — ${fmt(total)}`);
+}
+
+function renderGasLog() {
+  const GAS_BUDGET = 161;
+  const spent = S.gasFillups.reduce((a, g) => a + g.total, 0);
+  const pct   = Math.min(100, (spent / GAS_BUDGET) * 100);
+  const fill  = document.getElementById('gas-budget-fill');
+  fill.style.width = pct + '%';
+  fill.classList.toggle('over', spent > GAS_BUDGET);
+  document.getElementById('gas-budget-lbl').textContent = `${fmt(spent)} / ${fmt(GAS_BUDGET)}`;
+  const log = document.getElementById('gas-log');
+  log.innerHTML = S.gasFillups.length
+    ? [...S.gasFillups].reverse().slice(0,6).map(g =>
+        `<div class="log-item">
+          <span class="log-l">${g.date} · ${g.gallons.toFixed(3)} gal @ ${fmt(g.pricePer)}/gal</span>
+          <span class="log-r">${fmt(g.total)}</span>
+        </div>`).join('')
+    : '<div class="log-empty">No fill-ups yet</div>';
+}
+
 function toggleBills() {
   document.getElementById('bills-inner').classList.toggle('open');
   document.getElementById('bills-toggle').classList.toggle('open');
 }
 
 // ── Rendering ────────────────────────────────────────────────
-function refreshAll(animate = true) { refreshJars(animate); refreshIncome(); renderLogs(); }
+function refreshAll(animate = true) { refreshJars(animate); refreshIncome(); renderLogs(); renderGasLog(); }
 
 const _prevPct = { j1: 0, j2: 0 };
 
@@ -1010,6 +1136,9 @@ document.getElementById('s-earn').addEventListener('input',  calcShift);
 document.getElementById('s-hrs').addEventListener('input',   calcShift);
 document.getElementById('s-gas').addEventListener('input',   calcShift);
 document.getElementById('s-mpg').addEventListener('input',   onMpg);
+document.getElementById('g-gal').addEventListener('input',   calcGas);
+document.getElementById('g-ppg').addEventListener('input',   calcGas);
+document.getElementById('btn-log-gas').addEventListener('click', logGasFillup);
 </script>
 </body>
 </html>

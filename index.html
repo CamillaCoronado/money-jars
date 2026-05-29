@@ -210,36 +210,30 @@
       pointer-events: none; z-index: 3;
     }
     /* Bills jar — Bee themed */
-    /* Bills jar — stacked gold coins */
+    /* Bills jar — gold coins scattered (whimsical) */
     .jar-exp .jar-lid  { background: var(--bee-yellow); }
     .jar-exp .jar-neck { border-color: var(--bee-dark); }
     .jar-exp .jar-body { border-color: var(--bee-dark); border-width: 4px; }
-    .jar-exp .jar-fill {
-      background: repeating-linear-gradient(
-        0deg,
-        #3D2000 0px,  #3D2000 2px,
-        #B87800 2px,  #B87800 4px,
-        #FFD93D 4px,  #FFF4A0 13px,
-        #B87800 13px, #B87800 15px
-      );
-    }
+    .jar-exp .jar-fill { background: linear-gradient(to top, #B87800, #FFD93D 55%, #FFF4A0); }
     .jar-exp .wave { display: none; }
-    /* Free money jar — stacked dollar bills (PuppyCat) */
+    /* Free money jar — dollar bills scattered (PuppyCat) */
     .jar-free .jar-lid  { background: var(--puppy-pink); }
     .jar-free .jar-neck { border-color: var(--puppy-purple); }
     .jar-free .jar-body { border-color: var(--puppy-purple); border-width: 4px; }
-    .jar-free .jar-fill {
-      background: repeating-linear-gradient(
-        0deg,
-        #2D1060 0px,  #2D1060 2px,
-        #7B4FA5 2px,  #7B4FA5 4px,
-        #C4A0DC 4px,  #F0E5F8 19px,
-        #7B4FA5 19px, #7B4FA5 21px
-      );
-    }
+    .jar-free .jar-fill { background: linear-gradient(to top, #5B3090, #bb8ac2 55%, #F0E5F8); }
     .jar-free .wave { display: none; }
     .jar-exp  .jar-pill { background: #FFF4A0; color: #3D2000; }
     .jar-free .jar-pill { background: var(--primary-light); color: var(--puppy-purple); }
+    .jar-decor {
+      position: absolute; pointer-events: none; user-select: none;
+      opacity: 0.90; z-index: 2; line-height: 1;
+    }
+    .btn-blue-full {
+      background: linear-gradient(135deg, #71a1c5, #9bc5e0); color: #fff;
+      box-shadow: 0 4px 16px rgba(113,161,197,.30);
+    }
+    .opening-edit { display:none; margin-top:8px; gap:8px; align-items:center; }
+    .opening-edit.open { display:flex; }
     .jar-fill {
       position: absolute; bottom: 0; left: 0; right: 0;
       height: 0%; transition: height 1.2s cubic-bezier(.34,1.56,.64,1); z-index: 1;
@@ -529,7 +523,26 @@
 
   <!-- Gas fill-up tracker -->
   <div class="card" style="margin-bottom:16px">
-    <div class="sec-title"><div class="dot dot-gas"></div>Log Gas Fill-up</div>
+    <div class="sec-title"><div class="dot dot-gas"></div>Odometer &amp; Tank</div>
+    <div class="two-col" style="margin-bottom:10px">
+      <div class="ig" style="margin-bottom:0">
+        <div class="il">Odometer <span class="saved">saved</span></div>
+        <div class="iw">
+          <input type="number" id="g-odo" placeholder="0" min="0" step="1" class="sp">
+          <span class="sfx">mi</span>
+        </div>
+      </div>
+      <div class="ig" style="margin-bottom:0">
+        <div class="il">Tank level <span class="saved">saved</span></div>
+        <div class="iw">
+          <input type="number" id="g-tank" placeholder="0–100" min="0" max="100" step="1" class="sp">
+          <span class="sfx">%</span>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-ghost-sm" id="btn-save-tank" style="width:100%;padding:9px;margin-bottom:16px">💾 Save readings</button>
+    <div style="border-top:1px solid var(--border);padding-top:14px">
+    <div class="sec-title" style="margin-bottom:12px"><div class="dot dot-gas"></div>Log Gas Fill-up</div>
     <div class="two-col">
       <div class="ig" style="margin-bottom:0">
         <div class="il">Gallons</div>
@@ -559,6 +572,33 @@
       <div class="gas-budget-bar"><div class="gas-budget-fill" id="gas-budget-fill"></div></div>
       <div id="gas-log"><div class="log-empty">No fill-ups yet</div></div>
     </div>
+    </div>
+  </div>
+
+  <!-- Personal mileage -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="sec-title"><div class="dot" style="background:var(--puppy-blue)"></div>Log a Drive</div>
+    <div class="two-col">
+      <div class="ig" style="margin-bottom:0">
+        <div class="il">Miles</div>
+        <div class="iw">
+          <input type="number" id="pm-mi" placeholder="0.0" min="0" step="0.1" class="sp">
+          <span class="sfx">mi</span>
+        </div>
+      </div>
+      <div class="ig" style="margin-bottom:0">
+        <div class="il">Note (optional)</div>
+        <input type="text" id="pm-note" placeholder="Grocery run, appointment…">
+      </div>
+    </div>
+    <button class="btn-full btn-blue-full" id="btn-log-personal">🚗 Log Drive →</button>
+    <div style="margin-top:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div class="sec-title" style="margin-bottom:0"><div class="dot" style="background:var(--puppy-blue)"></div>Personal Miles This Month</div>
+        <span id="pm-total-lbl" style="font-size:12px;font-weight:700;color:var(--muted)">0 mi</span>
+      </div>
+      <div id="pm-log"><div class="log-empty">No personal trips yet</div></div>
+    </div>
   </div>
 
   <!-- Income this month -->
@@ -567,6 +607,20 @@
     <div class="income-row">
       <span class="income-lbl">🏦 Bank balance</span>
       <span class="income-val" id="inc-bank">$0.00</span>
+    </div>
+    <div class="income-row">
+      <span class="income-lbl" style="display:flex;align-items:center;gap:7px">
+        📅 Prior income
+        <button class="btn btn-ghost-sm" id="btn-edit-opening" style="font-size:10px;padding:3px 8px;line-height:1.3">edit</button>
+      </span>
+      <span class="income-val" id="inc-opening">$0.00</span>
+    </div>
+    <div class="opening-edit" id="opening-edit">
+      <div class="iw" style="flex:1">
+        <span class="pfx">$</span>
+        <input type="number" id="opening-inp" placeholder="Paycheck or income before you started tracking" min="0" step="0.01" class="pp" style="font-size:13px">
+      </div>
+      <button class="btn btn-purple-sm" id="btn-save-opening">Save</button>
     </div>
     <div class="income-row">
       <span class="income-lbl">🚗 Gig take-home</span>
@@ -721,7 +775,7 @@ const FIXED = 644;
 
 // ── App state ────────────────────────────────────────────────
 let uid     = null;
-let S       = { bank: 0, mpg: 0, shifts: [], paychecks: [], gasFillups: [] };
+let S       = { bank: 0, openingBalance: 0, mpg: 0, odo: 0, tankPct: 0, shifts: [], paychecks: [], gasFillups: [], personalTrips: [] };
 let preview = null;
 
 function month() {
@@ -733,7 +787,7 @@ function month() {
 const rentPaid   = () => S.shifts.reduce((a, s) => a + s.rentShare, 0);
 const gigIncome  = () => S.shifts.reduce((a, s) => a + s.takeHome,  0);
 const payIncome  = () => S.paychecks.reduce((a, p) => a + p.amount, 0);
-const totalIn    = () => S.bank + gigIncome() + payIncome();
+const totalIn    = () => S.bank + S.openingBalance + gigIncome() + payIncome();
 const jar1Target = () => FIXED + Math.min(rentPaid(), RENT_CAP);
 const jar1Amt    = () => Math.min(totalIn(), jar1Target());
 const jar2Amt    = () => Math.max(0, totalIn() - jar1Target());
@@ -743,24 +797,31 @@ async function loadData() {
   const settSnap = await getDoc(doc(db, 'users', uid, 'data', 'settings'));
   if (settSnap.exists()) {
     const d = settSnap.data();
-    S.bank = d.bank || 0;
-    S.mpg  = d.mpg  || 0;
+    S.bank           = d.bank           || 0;
+    S.openingBalance = d.openingBalance || 0;
+    S.mpg            = d.mpg            || 0;
+    S.odo            = d.odo            || 0;
+    S.tankPct        = d.tankPct        || 0;
   }
   const mSnap = await getDoc(doc(db, 'users', uid, 'months', month()));
   if (mSnap.exists()) {
     const d = mSnap.data();
-    S.shifts      = d.shifts      || [];
-    S.paychecks   = d.paychecks   || [];
-    S.gasFillups  = d.gasFillups  || [];
+    S.shifts        = d.shifts        || [];
+    S.paychecks     = d.paychecks     || [];
+    S.gasFillups    = d.gasFillups    || [];
+    S.personalTrips = d.personalTrips || [];
   } else {
-    S.shifts = []; S.paychecks = []; S.gasFillups = [];
+    S.shifts = []; S.paychecks = []; S.gasFillups = []; S.personalTrips = [];
   }
 }
 
 async function saveSettings() {
   if (!uid) return;
   try {
-    await setDoc(doc(db, 'users', uid, 'data', 'settings'), { bank: S.bank, mpg: S.mpg });
+    await setDoc(doc(db, 'users', uid, 'data', 'settings'), {
+    bank: S.bank, openingBalance: S.openingBalance,
+    mpg: S.mpg, odo: S.odo, tankPct: S.tankPct,
+  });
   } catch (e) {
     console.error('saveSettings failed:', e);
     toast('⚠️ Save failed — check Firestore rules');
@@ -771,7 +832,7 @@ async function saveMonthData() {
   if (!uid) return;
   try {
     await setDoc(doc(db, 'users', uid, 'months', month()), {
-      shifts: S.shifts, paychecks: S.paychecks, gasFillups: S.gasFillups,
+      shifts: S.shifts, paychecks: S.paychecks, gasFillups: S.gasFillups, personalTrips: S.personalTrips,
     });
   } catch (e) {
     console.error('saveMonthData failed:', e);
@@ -788,11 +849,15 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display          = 'block';
     await loadData();
-    if (S.mpg)  document.getElementById('s-mpg').value    = S.mpg;
+    if (S.mpg)  document.getElementById('s-mpg').value   = S.mpg;
     if (S.bank) {
-      document.getElementById('bank-inp').value            = S.bank;
-      document.getElementById('bank-display').textContent  = fmt(S.bank);
+      document.getElementById('bank-inp').value           = S.bank;
+      document.getElementById('bank-display').textContent = fmt(S.bank);
     }
+    if (S.openingBalance) document.getElementById('opening-inp').value = S.openingBalance;
+    if (S.odo)     document.getElementById('g-odo').value   = S.odo;
+    if (S.tankPct) document.getElementById('g-tank').value  = S.tankPct;
+    populateJarDecor();
     renderBills();
     refreshAll(false);
   } else {
@@ -930,13 +995,80 @@ function renderGasLog() {
     : '<div class="log-empty">No fill-ups yet</div>';
 }
 
+function saveOpening() {
+  S.openingBalance = +(document.getElementById('opening-inp').value) || 0;
+  saveSettings();
+  document.getElementById('opening-edit').classList.remove('open');
+  refreshJars();
+  refreshIncome();
+  toast('📅 Prior income saved');
+}
+
+function saveTankOdo() {
+  S.odo     = +(document.getElementById('g-odo').value)   || 0;
+  S.tankPct = +(document.getElementById('g-tank').value)  || 0;
+  saveSettings();
+  toast(`💾 Odometer ${S.odo.toLocaleString()} mi · Tank ${S.tankPct}%`);
+}
+
+function logPersonalTrip() {
+  const mi   = +(document.getElementById('pm-mi').value) || 0;
+  const note = document.getElementById('pm-note').value.trim() || 'Drive';
+  if (mi <= 0) { toast('⚠️ Enter miles first'); return; }
+  S.personalTrips.push({
+    id: Date.now(),
+    date: new Date().toLocaleDateString('en-US', { month:'short', day:'numeric' }),
+    miles: mi, note,
+  });
+  saveMonthData();
+  document.getElementById('pm-mi').value   = '';
+  document.getElementById('pm-note').value = '';
+  renderPersonalLog();
+  soundCoin();
+  toast(`🚗 ${mi} mi logged — ${note}`);
+}
+
+function renderPersonalLog() {
+  const total = S.personalTrips.reduce((a, t) => a + t.miles, 0);
+  document.getElementById('pm-total-lbl').textContent = `${total.toFixed(1)} mi`;
+  const log = document.getElementById('pm-log');
+  log.innerHTML = S.personalTrips.length
+    ? [...S.personalTrips].reverse().slice(0, 8).map(t =>
+        `<div class="log-item">
+          <span class="log-l">${t.date} · ${t.note}</span>
+          <span class="log-r">${t.miles} mi</span>
+        </div>`).join('')
+    : '<div class="log-empty">No personal trips yet</div>';
+}
+
+function populateJarDecor() {
+  const configs = [
+    { id: 'j1-fill', items: ['🪙','🪙','💰','⭐','🪙','✨','🪙','💫'] },
+    { id: 'j2-fill', items: ['💵','💵','💜','✨','💵','🌟','💵','⭐'] },
+  ];
+  configs.forEach(({ id, items }) => {
+    const fill = document.getElementById(id);
+    fill.querySelectorAll('.jar-decor').forEach(e => e.remove());
+    for (let i = 0; i < 18; i++) {
+      const el = document.createElement('span');
+      el.className = 'jar-decor';
+      el.textContent = items[i % items.length];
+      el.style.fontSize  = (10 + Math.random() * 14) + 'px';
+      el.style.left      = (2 + Math.random() * 88) + '%';
+      el.style.bottom    = (1 + Math.random() * 94) + '%';
+      el.style.transform = `rotate(${-100 + Math.random() * 200}deg)`;
+      fill.appendChild(el);
+    }
+  });
+}
+
 function toggleBills() {
   document.getElementById('bills-inner').classList.toggle('open');
   document.getElementById('bills-toggle').classList.toggle('open');
 }
 
 // ── Rendering ────────────────────────────────────────────────
-function refreshAll(animate = true) { refreshJars(animate); refreshIncome(); renderLogs(); renderGasLog(); }
+function refreshAll(animate = true) { refreshJars(animate); refreshIncome(); renderLogs(); renderGasLog(); renderPersonalLog(); }
 
 const _prevPct = { j1: 0, j2: 0 };
 
@@ -1003,10 +1135,11 @@ function setFill(id, pct) {
 }
 
 function refreshIncome() {
-  set('inc-bank',  fmt(S.bank));
-  set('inc-gig',   fmt(gigIncome()));
-  set('inc-pay',   fmt(payIncome()));
-  set('inc-total', fmt(totalIn()));
+  set('inc-bank',    fmt(S.bank));
+  set('inc-opening', fmt(S.openingBalance));
+  set('inc-gig',     fmt(gigIncome()));
+  set('inc-pay',     fmt(payIncome()));
+  set('inc-total',   fmt(totalIn()));
 }
 
 function renderBills() {
@@ -1156,6 +1289,12 @@ document.getElementById('s-mpg').addEventListener('input',   onMpg);
 document.getElementById('g-gal').addEventListener('input',   calcGas);
 document.getElementById('g-ppg').addEventListener('input',   calcGas);
 document.getElementById('btn-log-gas').addEventListener('click', logGasFillup);
+document.getElementById('btn-save-tank').addEventListener('click', saveTankOdo);
+document.getElementById('btn-log-personal').addEventListener('click', logPersonalTrip);
+document.getElementById('btn-edit-opening').addEventListener('click', () => {
+  document.getElementById('opening-edit').classList.toggle('open');
+});
+document.getElementById('btn-save-opening').addEventListener('click', saveOpening);
 </script>
 </body>
 </html>

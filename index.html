@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Money Jars</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F0EDFF;
+      --surface: #FFFFFF;
+      --primary: #7B61FF;
+      --primary-light: #EDE9FF;
+      --text: #111827;
+      --muted: #6B7280;
+      --border: #E5E7EB;
+      --green: #059669;
+      --green-light: #D1FAE5;
+      --orange: #F97316;
+      --orange-light: #FFF0E6;
+      --r: 20px;
+      --shadow: 0 2px 16px rgba(123,97,255,0.08);
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px 16px 80px;
+    }
+
+    .app { max-width: 880px; margin: 0 auto; }
+
+    /* ── Header ── */
+    .header { text-align: center; margin-bottom: 28px; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--primary-light); color: var(--primary);
+      font-size: 12px; font-weight: 700; letter-spacing: 0.5px;
+      padding: 5px 14px; border-radius: 100px; margin-bottom: 12px;
+    }
+    .header h1 { font-size: 28px; font-weight: 800; }
+    .header p { color: var(--muted); font-size: 14px; margin-top: 6px; }
+
+    /* ── New month banner ── */
+    .banner {
+      background: #FEF3C7; border-radius: 14px;
+      padding: 12px 16px; margin-bottom: 18px;
+      display: none; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .banner span { font-size: 13px; font-weight: 600; color: #92400E; }
+
+    /* ── Bank bar ── */
+    .bank-bar {
+      background: var(--surface); border-radius: var(--r);
+      padding: 16px 20px; display: flex; align-items: center;
+      justify-content: space-between; box-shadow: var(--shadow);
+      margin-bottom: 20px; gap: 16px; flex-wrap: wrap;
+    }
+    .bank-left { display: flex; align-items: center; gap: 12px; }
+    .bank-icon {
+      width: 42px; height: 42px; border-radius: 12px;
+      background: var(--green-light);
+      display: flex; align-items: center; justify-content: center; font-size: 20px;
+    }
+    .lbl { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 2px; }
+    .bank-val { font-size: 22px; font-weight: 800; }
+    .bank-edit { display: flex; align-items: center; gap: 8px; }
+    .inp-wrap { position: relative; }
+    .pfx-icon {
+      position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
+      font-size: 13px; font-weight: 600; color: var(--muted); pointer-events: none;
+    }
+    .bank-inp {
+      width: 130px; padding: 8px 10px 8px 22px;
+      font-family: inherit; font-size: 15px; font-weight: 700; color: var(--text);
+      background: var(--bg); border: 2px solid var(--border); border-radius: 10px;
+      outline: none; transition: border-color .15s;
+      -moz-appearance: textfield;
+    }
+    .bank-inp::-webkit-inner-spin-button,
+    .bank-inp::-webkit-outer-spin-button { -webkit-appearance: none; }
+    .bank-inp:focus { border-color: var(--primary); }
+
+    /* ── Buttons ── */
+    .btn {
+      padding: 9px 16px; font-family: inherit; font-size: 13px; font-weight: 700;
+      border: none; border-radius: 10px; cursor: pointer; transition: all .15s; white-space: nowrap;
+    }
+    .btn-purple-sm { background: var(--primary); color: #fff; }
+    .btn-purple-sm:hover { opacity: .85; }
+    .btn-ghost-sm { background: var(--primary-light); color: var(--primary); }
+    .btn-ghost-sm:hover { background: var(--primary); color: #fff; }
+    .btn-full {
+      width: 100%; padding: 14px;
+      font-family: inherit; font-size: 15px; font-weight: 700;
+      border: none; border-radius: 12px; cursor: pointer;
+      transition: opacity .15s, transform .12s; margin-top: 14px;
+    }
+    .btn-full:hover { opacity: .9; transform: translateY(-1px); }
+    .btn-full:active { transform: translateY(0); }
+    .btn-full:disabled { opacity: .35; cursor: not-allowed; transform: none; }
+    .btn-purple-full {
+      background: linear-gradient(135deg, #7B61FF, #B45FE0); color: #fff;
+      box-shadow: 0 4px 16px rgba(123,97,255,.28);
+    }
+    .btn-orange-full {
+      background: linear-gradient(135deg, #F97316, #FBBF24); color: #fff;
+      box-shadow: 0 4px 16px rgba(249,115,22,.25);
+    }
+
+    /* ── Jars ── */
+    .jars-row {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 16px; margin-bottom: 20px;
+    }
+    @media (max-width: 520px) { .jars-row { grid-template-columns: 1fr; } }
+
+    .jar-card {
+      background: var(--surface); border-radius: var(--r);
+      padding: 24px 20px; box-shadow: var(--shadow);
+      display: flex; flex-direction: column; align-items: center; gap: 16px;
+    }
+
+    /* Jar shape */
+    .jar-visual { display: flex; flex-direction: column; align-items: center; }
+    .jar-lid {
+      width: 88px; height: 12px; border-radius: 4px; z-index: 1;
+    }
+    .jar-neck {
+      width: 68px; height: 16px;
+      border-left: 3px solid; border-right: 3px solid;
+      border-top: none; border-bottom: none;
+    }
+    .jar-body {
+      width: 116px; height: 164px;
+      border: 3px solid; border-radius: 6px 6px 26px 26px;
+      position: relative; overflow: hidden;
+      background: rgba(255,255,255,0.12);
+    }
+    /* glass shine */
+    .jar-body::after {
+      content: ''; position: absolute;
+      top: 8%; left: 10%; width: 11%; height: 50%;
+      background: rgba(255,255,255,.28); border-radius: 50%;
+      pointer-events: none; z-index: 3;
+    }
+
+    /* Expenses jar — orange */
+    .jar-exp .jar-lid  { background: #FFA866; }
+    .jar-exp .jar-neck { border-color: #FFA866; }
+    .jar-exp .jar-body { border-color: #FFA866; }
+    .jar-exp .jar-fill { background: linear-gradient(to top, #E8610F, #FFA040); }
+    .jar-exp .wave     { background: #FF8C2A; }
+
+    /* Free money jar — purple */
+    .jar-free .jar-lid  { background: #A58AFF; }
+    .jar-free .jar-neck { border-color: #A58AFF; }
+    .jar-free .jar-body { border-color: #A58AFF; }
+    .jar-free .jar-fill { background: linear-gradient(to top, #5B3FFF, #A87AFF); }
+    .jar-free .wave     { background: #7B5FFF; }
+
+    /* Fill + wave */
+    .jar-fill {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 0%; transition: height 1.4s cubic-bezier(.4,0,.2,1);
+      z-index: 1;
+    }
+    .wave {
+      position: absolute; top: -18px; left: -50%;
+      width: 200%; height: 36px; border-radius: 45%;
+      opacity: .7; animation: wave-rock 4s ease-in-out infinite;
+    }
+    @keyframes wave-rock {
+      0%,100% { transform: rotate(-2deg) translateX(0); }
+      50%      { transform: rotate(2deg) translateX(-5%); }
+    }
+
+    /* Jar info */
+    .jar-info { text-align: center; width: 100%; }
+    .jar-name { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 4px; }
+    .jar-amt  { font-size: 26px; font-weight: 800; line-height: 1; }
+    .jar-sub  { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .jar-pill {
+      display: inline-block; font-size: 11px; font-weight: 700;
+      padding: 3px 10px; border-radius: 100px; margin-top: 6px;
+    }
+    .jar-exp  .jar-pill { background: var(--orange-light); color: var(--orange); }
+    .jar-free .jar-pill { background: var(--primary-light); color: var(--primary); }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface); border-radius: var(--r);
+      padding: 20px; box-shadow: var(--shadow); margin-bottom: 16px;
+    }
+    .sec-title {
+      font-size: 11px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .6px;
+      display: flex; align-items: center; gap: 7px; margin-bottom: 16px;
+    }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--primary); flex-shrink: 0; }
+    .dot-o { background: var(--orange); }
+
+    /* ── Bills collapsible ── */
+    .bills-toggle-row {
+      padding: 16px 20px; display: flex; align-items: center;
+      justify-content: space-between; cursor: pointer; user-select: none;
+      font-size: 14px; font-weight: 700;
+    }
+    .bills-toggle-row span:last-child { font-size: 18px; transition: transform .2s; }
+    .bills-toggle-row.open span:last-child { transform: rotate(180deg); }
+    .bills-inner { display: none; padding: 0 20px 16px; }
+    .bills-inner.open { display: block; }
+    .bill-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px;
+    }
+    .bill-row:last-child { border-bottom: none; }
+    .bill-left { display: flex; align-items: center; gap: 9px; font-weight: 600; color: var(--muted); }
+    .bill-amt { font-weight: 700; }
+    .bill-dyn { color: var(--primary); font-size: 12px; font-weight: 700; }
+    .bills-total {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 0 0; margin-top: 4px; border-top: 2px solid var(--border);
+      font-weight: 800; font-size: 15px;
+    }
+
+    /* ── Income row ── */
+    .income-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 0; font-size: 14px;
+    }
+    .income-row + .income-row { border-top: 1px solid var(--border); }
+    .income-lbl { color: var(--muted); font-weight: 600; }
+    .income-val { font-weight: 800; font-size: 16px; }
+    .income-total {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 0 0; margin-top: 4px; border-top: 2px solid var(--border);
+      font-weight: 800; font-size: 16px;
+    }
+
+    /* ── Two-col ── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 560px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* ── Inputs ── */
+    .ig { margin-bottom: 13px; }
+    .ig:last-child { margin-bottom: 0; }
+    .il {
+      font-size: 12px; font-weight: 600; color: var(--muted);
+      margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .saved { font-size: 10px; font-weight: 700; color: var(--primary); background: var(--primary-light); padding: 2px 7px; border-radius: 100px; }
+    .iw { position: relative; }
+    .pfx, .sfx {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      font-size: 13px; font-weight: 600; color: var(--muted); pointer-events: none;
+    }
+    .pfx { left: 12px; }
+    .sfx { right: 12px; }
+    input[type="number"], input[type="text"] {
+      width: 100%; padding: 11px 12px;
+      font-family: inherit; font-size: 15px; font-weight: 700; color: var(--text);
+      background: #F9F9FB; border: 2px solid var(--border); border-radius: 12px;
+      outline: none; transition: border-color .15s, background .15s;
+      -moz-appearance: textfield;
+    }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    input:focus { border-color: var(--primary); background: var(--primary-light); }
+    .pp { padding-left: 26px; }
+    .sp { padding-right: 44px; }
+
+    /* ── Shift preview tiles ── */
+    .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+    .tile { background: #F9F9FB; border-radius: 12px; padding: 12px 14px; }
+    .t-lbl {
+      font-size: 10px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .5px; margin-bottom: 5px;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .t-val { font-size: 20px; font-weight: 800; }
+    .t-val.neg { color: #EF4444; }
+    .cap { font-size: 9px; font-weight: 800; background: #FEF3C7; color: #D97706; padding: 2px 6px; border-radius: 100px; }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, #7B61FF, #B45FE0);
+      border-radius: var(--r); padding: 20px; text-align: center; color: #fff;
+      box-shadow: 0 6px 24px rgba(123,97,255,.28); margin-top: 14px;
+    }
+    .hero-lbl { font-size: 10px; font-weight: 700; opacity: .75; letter-spacing: .7px; text-transform: uppercase; margin-bottom: 4px; }
+    .hero-val { font-size: 44px; font-weight: 800; line-height: 1; }
+    .hero-sub { font-size: 12px; opacity: .65; margin-top: 3px; }
+
+    /* ── Log list ── */
+    .log-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 7px 0; border-top: 1px solid var(--border); font-size: 12px;
+    }
+    .log-l { color: var(--muted); font-weight: 500; }
+    .log-r { font-weight: 700; }
+    .log-empty { font-size: 13px; color: var(--muted); padding: 12px 0; text-align: center; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #111827; color: #fff;
+      padding: 11px 20px; border-radius: 100px;
+      font-size: 14px; font-weight: 600;
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+      z-index: 9999; white-space: nowrap; pointer-events: none;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <div class="badge">🫙 Money Jars</div>
+    <h1>Expenses first. Then what's yours.</h1>
+    <p>Fill the bills jar before the free money jar can grow.</p>
+  </div>
+
+  <div class="banner" id="banner">
+    <span>🗓️ It's a new month — ready to start fresh?</span>
+    <button class="btn btn-ghost-sm" onclick="resetMonth()">New Month</button>
+  </div>
+
+  <!-- Bank balance -->
+  <div class="bank-bar">
+    <div class="bank-left">
+      <div class="bank-icon">🏦</div>
+      <div>
+        <div class="lbl">Bank balance</div>
+        <div class="bank-val" id="bank-display">$0.00</div>
+      </div>
+    </div>
+    <div class="bank-edit">
+      <div class="inp-wrap">
+        <span class="pfx-icon">$</span>
+        <input type="number" class="bank-inp" id="bank-inp" placeholder="0.00" min="0" step="0.01">
+      </div>
+      <button class="btn btn-purple-sm" onclick="saveBank()">Update</button>
+    </div>
+  </div>
+
+  <!-- Two jars -->
+  <div class="jars-row">
+
+    <div class="jar-card jar-exp">
+      <div class="jar-visual">
+        <div class="jar-lid"></div>
+        <div class="jar-neck"></div>
+        <div class="jar-body">
+          <div class="jar-fill" id="j1-fill"><div class="wave"></div></div>
+        </div>
+      </div>
+      <div class="jar-info">
+        <div class="jar-name">🧾 Bills Jar</div>
+        <div class="jar-amt" id="j1-amt">$0</div>
+        <div class="jar-sub" id="j1-sub">of $0 covered</div>
+        <span class="jar-pill" id="j1-pill">0%</span>
+      </div>
+    </div>
+
+    <div class="jar-card jar-free">
+      <div class="jar-visual">
+        <div class="jar-lid"></div>
+        <div class="jar-neck"></div>
+        <div class="jar-body">
+          <div class="jar-fill" id="j2-fill"><div class="wave"></div></div>
+        </div>
+      </div>
+      <div class="jar-info">
+        <div class="jar-name">✨ Free Money</div>
+        <div class="jar-amt" id="j2-amt">$0</div>
+        <div class="jar-sub">yours to keep</div>
+        <span class="jar-pill" id="j2-pill" style="display:none">0%</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bills breakdown -->
+  <div class="card" style="padding:0; margin-bottom:16px">
+    <div class="bills-toggle-row" id="bills-toggle" onclick="toggleBills()">
+      <span>🧾 Monthly Bills</span>
+      <span>▾</span>
+    </div>
+    <div class="bills-inner" id="bills-inner"></div>
+  </div>
+
+  <!-- Income this month -->
+  <div class="card">
+    <div class="sec-title"><div class="dot"></div>Income This Month</div>
+    <div class="income-row">
+      <span class="income-lbl">🚗 Gig take-home</span>
+      <span class="income-val" id="inc-gig">$0.00</span>
+    </div>
+    <div class="income-row">
+      <span class="income-lbl">💼 Paychecks</span>
+      <span class="income-val" id="inc-pay">$0.00</span>
+    </div>
+    <div class="income-total">
+      <span>Total in</span>
+      <span id="inc-total">$0.00</span>
+    </div>
+  </div>
+
+  <!-- Shift calc + Paychecks -->
+  <div class="two-col">
+
+    <div class="card" style="margin-bottom:0">
+      <div class="sec-title"><div class="dot"></div>Log a Shift</div>
+
+      <div class="ig">
+        <div class="il">Miles Driven</div>
+        <div class="iw">
+          <input type="number" id="s-mi" placeholder="0" min="0" step="0.1" class="sp" oninput="calcShift()">
+          <span class="sfx">mi</span>
+        </div>
+      </div>
+      <div class="ig">
+        <div class="il">Gross Earnings</div>
+        <div class="iw">
+          <span class="pfx">$</span>
+          <input type="number" id="s-earn" placeholder="0.00" min="0" step="0.01" class="pp" oninput="calcShift()">
+        </div>
+      </div>
+      <div class="ig">
+        <div class="il">Hours Worked</div>
+        <div class="iw">
+          <input type="number" id="s-hrs" placeholder="0.0" min="0" step="0.1" class="sp" oninput="calcShift()">
+          <span class="sfx">hrs</span>
+        </div>
+      </div>
+      <div class="ig">
+        <div class="il">Gas Price</div>
+        <div class="iw">
+          <span class="pfx">$</span>
+          <input type="number" id="s-gas" placeholder="0.00" min="0" step="0.01" class="pp sp" oninput="calcShift()">
+          <span class="sfx">/ gal</span>
+        </div>
+      </div>
+      <div class="ig">
+        <div class="il">Rolling MPG <span class="saved">saved</span></div>
+        <div class="iw">
+          <input type="number" id="s-mpg" placeholder="0.0" min="1" step="0.1" class="sp" oninput="onMpg()">
+          <span class="sfx">mpg</span>
+        </div>
+      </div>
+
+      <div id="shift-preview" style="display:none">
+        <div class="tiles">
+          <div class="tile">
+            <div class="t-lbl">⛽ Gas</div>
+            <div class="t-val neg" id="p-gas">—</div>
+          </div>
+          <div class="tile">
+            <div class="t-lbl">🏠 Rent <span class="cap" id="p-cap" style="display:none">CAPPED</span></div>
+            <div class="t-val neg" id="p-rent">—</div>
+          </div>
+          <div class="tile" style="background:var(--green-light)">
+            <div class="t-lbl" style="color:var(--green)">💸 Take Home</div>
+            <div class="t-val" style="color:var(--green)" id="p-home">—</div>
+          </div>
+          <div class="tile" style="background:var(--primary-light)">
+            <div class="t-lbl" style="color:var(--primary)">⏱️ Hourly</div>
+            <div class="t-val" style="color:var(--primary)" id="p-hrly">—</div>
+          </div>
+        </div>
+        <div class="hero">
+          <div class="hero-lbl">Real Hourly Rate</div>
+          <div class="hero-val" id="p-hero">—</div>
+          <div class="hero-sub">after gas & rent</div>
+        </div>
+        <button class="btn-full btn-purple-full" onclick="logShift()">Log this shift →</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:0">
+      <div class="sec-title"><div class="dot dot-o"></div>Add Paycheck</div>
+      <div class="ig">
+        <div class="il">Amount</div>
+        <div class="iw">
+          <span class="pfx">$</span>
+          <input type="number" id="pc-amt" placeholder="0.00" min="0" step="0.01" class="pp">
+        </div>
+      </div>
+      <div class="ig">
+        <div class="il">Label (optional)</div>
+        <input type="text" id="pc-lbl" placeholder="Regular job, tips…">
+      </div>
+      <button class="btn-full btn-orange-full" onclick="addPaycheck()">Add Paycheck →</button>
+
+      <div style="margin-top:18px">
+        <div class="sec-title" style="margin-bottom:8px"><div class="dot dot-o"></div>Paycheck Log</div>
+        <div id="pay-log"><div class="log-empty">No paychecks yet</div></div>
+      </div>
+
+      <div style="margin-top:18px">
+        <div class="sec-title" style="margin-bottom:8px"><div class="dot"></div>Shift Log</div>
+        <div id="shift-log"><div class="log-empty">No shifts yet</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── Constants ───────────────────────────────────────────────
+  const RENT_CAP = 450;
+  const BILLS = [
+    { name: 'Rent',          emoji: '🏠', amount: 0,   dynamic: true },
+    { name: 'Insurance',     emoji: '🛡️', amount: 100 },
+    { name: 'Storage',       emoji: '📦', amount: 100 },
+    { name: 'Phone',         emoji: '📱', amount: 25  },
+    { name: 'Claude',        emoji: '🤖', amount: 20  },
+    { name: 'Netflix',       emoji: '🎬', amount: 10  },
+    { name: 'Disney/Hulu',   emoji: '🎭', amount: 6   },
+    { name: 'Spotify',       emoji: '🎵', amount: 12  },
+    { name: 'Gas',           emoji: '⛽', amount: 161 },
+    { name: 'Weed',          emoji: '🌿', amount: 60  },
+    { name: 'Pet food',      emoji: '🐾', amount: 100 },
+    { name: 'Buffer',        emoji: '✨', amount: 50  },
+  ];
+  const FIXED = 644; // sum of non-rent bills
+
+  // ── State ───────────────────────────────────────────────────
+  let S = { bank: 0, mpg: 0, shifts: [], paychecks: [] };
+
+  function month() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  }
+
+  function load() {
+    S.bank = +(localStorage.getItem('mj_bank') || 0);
+    S.mpg  = +(localStorage.getItem('mj_mpg')  || 0);
+    const stored = localStorage.getItem('mj_month');
+    if (stored === month()) {
+      try { S.shifts    = JSON.parse(localStorage.getItem('mj_shifts')    || '[]'); } catch { S.shifts = []; }
+      try { S.paychecks = JSON.parse(localStorage.getItem('mj_checks')    || '[]'); } catch { S.paychecks = []; }
+    } else {
+      S.shifts = []; S.paychecks = [];
+      if (stored) show('banner');
+    }
+  }
+
+  function persist() {
+    localStorage.setItem('mj_month',  month());
+    localStorage.setItem('mj_shifts', JSON.stringify(S.shifts));
+    localStorage.setItem('mj_checks', JSON.stringify(S.paychecks));
+  }
+
+  // ── Derived ─────────────────────────────────────────────────
+  const rentPaid   = () => S.shifts.reduce((a, s) => a + s.rentShare, 0);
+  const gigIncome  = () => S.shifts.reduce((a, s) => a + s.takeHome, 0);
+  const payIncome  = () => S.paychecks.reduce((a, p) => a + p.amount, 0);
+  const totalIn    = () => gigIncome() + payIncome();
+  const jar1Target = () => FIXED + Math.min(rentPaid(), RENT_CAP);
+  const jar1Amt    = () => Math.min(totalIn(), jar1Target());
+  const jar2Amt    = () => Math.max(0, totalIn() - jar1Target());
+
+  // ── Actions ─────────────────────────────────────────────────
+  function saveBank() {
+    S.bank = +(document.getElementById('bank-inp').value) || 0;
+    localStorage.setItem('mj_bank', S.bank);
+    document.getElementById('bank-display').textContent = fmt(S.bank);
+    toast('🏦 Balance updated');
+  }
+
+  function onMpg() {
+    const v = +(document.getElementById('s-mpg').value);
+    if (v > 0) { S.mpg = v; localStorage.setItem('mj_mpg', v); }
+    calcShift();
+  }
+
+  function resetMonth() {
+    S.shifts = []; S.paychecks = [];
+    persist();
+    hide('banner');
+    refreshAll();
+    toast('🎉 New month started!');
+  }
+
+  // ── Shift calculator ─────────────────────────────────────────
+  let preview = null;
+
+  function calcShift() {
+    const mi   = +(document.getElementById('s-mi').value)   || 0;
+    const earn = +(document.getElementById('s-earn').value) || 0;
+    const hrs  = +(document.getElementById('s-hrs').value)  || 0;
+    const gas  = +(document.getElementById('s-gas').value)  || 0;
+    const mpg  = +(document.getElementById('s-mpg').value)  || 0;
+
+    if (!earn && !mi) { hide('shift-preview'); preview = null; return; }
+
+    const gasCost = mpg > 0 ? (mi / mpg) * gas : 0;
+    const rRaw    = earn * 0.30;
+    const rPaid   = rentPaid();
+    let rentShare, capped;
+    if (rPaid + rRaw > RENT_CAP) {
+      rentShare = Math.max(0, RENT_CAP - rPaid);
+      capped = true;
+    } else {
+      rentShare = rRaw;
+      capped = false;
+    }
+    const takeHome = earn - gasCost - rentShare;
+    const hourly   = hrs > 0 ? takeHome / hrs : null;
+
+    preview = { mi, earn, hrs, gasCost, rentShare, takeHome, hourly };
+
+    set('p-gas',  `−${fmt(gasCost)}`);
+    set('p-rent', `−${fmt(rentShare)}`);
+    set('p-home', fmt(takeHome));
+    set('p-hrly', hourly !== null ? fmt(hourly) : '—');
+    set('p-hero', hourly !== null ? fmt(hourly) : '—');
+    document.getElementById('p-cap').style.display = capped ? 'inline' : 'none';
+    show('shift-preview');
+  }
+
+  function logShift() {
+    if (!preview) return;
+    S.shifts.push({
+      id: Date.now(),
+      date: new Date().toLocaleDateString('en-US', { month:'short', day:'numeric' }),
+      mi: preview.mi, earn: preview.earn, hrs: preview.hrs,
+      gasCost: preview.gasCost, rentShare: preview.rentShare, takeHome: preview.takeHome,
+    });
+    persist();
+    ['s-mi','s-earn','s-hrs','s-gas'].forEach(id => document.getElementById(id).value = '');
+    hide('shift-preview');
+    preview = null;
+    refreshAll();
+    toast(`✅ Shift logged — ${fmt(S.shifts.at(-1).takeHome)} going into jars`);
+  }
+
+  function addPaycheck() {
+    const amt = +(document.getElementById('pc-amt').value) || 0;
+    const lbl = document.getElementById('pc-lbl').value.trim() || 'Paycheck';
+    if (amt <= 0) { toast('⚠️ Enter an amount first'); return; }
+    S.paychecks.push({
+      id: Date.now(),
+      date: new Date().toLocaleDateString('en-US', { month:'short', day:'numeric' }),
+      amount: amt, label: lbl,
+    });
+    persist();
+    document.getElementById('pc-amt').value = '';
+    document.getElementById('pc-lbl').value = '';
+    refreshAll();
+    toast(`💼 ${fmt(amt)} added from ${lbl}`);
+  }
+
+  // ── Rendering ─────────────────────────────────────────────
+  function refreshAll() {
+    refreshJars();
+    refreshIncome();
+    renderBills();
+    renderLogs();
+  }
+
+  function refreshJars() {
+    const t1  = jar1Target();
+    const a1  = jar1Amt();
+    const a2  = jar2Amt();
+    const p1  = t1 > 0 ? Math.min(100, (a1 / t1) * 100) : 0;
+    const p2  = t1 > 0 ? Math.min(100, (a2 / t1) * 100) : 0;
+
+    setFill('j1-fill', p1);
+    set('j1-amt',  fmt(a1));
+    set('j1-sub',  `of ${fmt(t1)} covered`);
+    set('j1-pill', `${Math.round(p1)}% covered`);
+
+    setFill('j2-fill', p2);
+    set('j2-amt', fmt(a2));
+    const pill2 = document.getElementById('j2-pill');
+    if (a2 > 0) {
+      pill2.style.display = 'inline-block';
+      pill2.textContent = a2 >= t1 ? '🎉 overflowing!' : `${Math.round(p2)}% of bills extra`;
+    } else {
+      pill2.style.display = 'none';
+    }
+  }
+
+  function setFill(id, pct) {
+    const el = document.getElementById(id);
+    el.style.height = `${pct}%`;
+    el.querySelector('.wave').style.visibility = pct < 2 ? 'hidden' : 'visible';
+  }
+
+  function refreshIncome() {
+    set('inc-gig',   fmt(gigIncome()));
+    set('inc-pay',   fmt(payIncome()));
+    set('inc-total', fmt(totalIn()));
+  }
+
+  function renderBills() {
+    const rp = rentPaid();
+    const rows = BILLS.map(b => {
+      if (b.dynamic) {
+        return `<div class="bill-row">
+          <div class="bill-left"><span>${b.emoji}</span><span>${b.name}</span></div>
+          <span class="bill-amt"><span class="bill-dyn">${fmt(Math.min(rp, RENT_CAP))}</span> / ${fmt(RENT_CAP)} cap</span>
+        </div>`;
+      }
+      return `<div class="bill-row">
+        <div class="bill-left"><span>${b.emoji}</span><span>${b.name}</span></div>
+        <span class="bill-amt">${fmt(b.amount)}</span>
+      </div>`;
+    }).join('');
+
+    document.getElementById('bills-inner').innerHTML = `
+      ${rows}
+      <div class="bills-total"><span>Monthly total</span><span>${fmt(jar1Target())}</span></div>
+    `;
+  }
+
+  function renderLogs() {
+    const sl = document.getElementById('shift-log');
+    const pl = document.getElementById('pay-log');
+
+    sl.innerHTML = S.shifts.length
+      ? [...S.shifts].reverse().slice(0, 6).map(s =>
+          `<div class="log-item">
+            <span class="log-l">${s.date} · ${s.mi}mi · ${fmt(s.earn)} gross</span>
+            <span class="log-r">${fmt(s.takeHome)}</span>
+          </div>`).join('')
+      : '<div class="log-empty">No shifts yet</div>';
+
+    pl.innerHTML = S.paychecks.length
+      ? [...S.paychecks].reverse().slice(0, 6).map(p =>
+          `<div class="log-item">
+            <span class="log-l">${p.date} · ${p.label}</span>
+            <span class="log-r">${fmt(p.amount)}</span>
+          </div>`).join('')
+      : '<div class="log-empty">No paychecks yet</div>';
+  }
+
+  function toggleBills() {
+    document.getElementById('bills-inner').classList.toggle('open');
+    document.getElementById('bills-toggle').classList.toggle('open');
+  }
+
+  // ── Helpers ─────────────────────────────────────────────────
+  function fmt(n) {
+    return new Intl.NumberFormat('en-US', { style:'currency', currency:'USD', minimumFractionDigits:2 }).format(n);
+  }
+  function set(id, v) { document.getElementById(id).textContent = v; }
+  function show(id) { document.getElementById(id).style.display = 'flex'; }
+  function hide(id) { document.getElementById(id).style.display = 'none'; }
+
+  let _tt;
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg; el.classList.add('show');
+    clearTimeout(_tt); _tt = setTimeout(() => el.classList.remove('show'), 3200);
+  }
+
+  // ── Boot ────────────────────────────────────────────────────
+  window.addEventListener('DOMContentLoaded', () => {
+    load();
+    document.getElementById('bank-display').textContent = fmt(S.bank);
+    if (S.bank) document.getElementById('bank-inp').value = S.bank;
+    if (S.mpg)  document.getElementById('s-mpg').value   = S.mpg;
+    renderBills();
+    refreshAll();
+  });
+</script>
+</body>
+</html>

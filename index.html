@@ -29,10 +29,55 @@
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      padding: 24px 16px 80px;
     }
 
-    .app { max-width: 880px; margin: 0 auto; }
+    /* ── Login screen ── */
+    #login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .login-card {
+      background: var(--surface);
+      border-radius: 28px;
+      padding: 48px 40px;
+      box-shadow: 0 8px 48px rgba(123,97,255,0.14);
+      text-align: center;
+      max-width: 380px;
+      width: 100%;
+    }
+    .login-emoji { font-size: 64px; margin-bottom: 20px; }
+    .login-card h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+    .login-card p { color: var(--muted); font-size: 15px; line-height: 1.5; margin-bottom: 32px; }
+    .btn-google {
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      width: 100%; padding: 14px 20px;
+      background: #fff; border: 2px solid var(--border); border-radius: 14px;
+      font-family: inherit; font-size: 15px; font-weight: 700; color: var(--text);
+      cursor: pointer; transition: border-color .15s, box-shadow .15s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .btn-google:hover { border-color: var(--primary); box-shadow: 0 4px 16px rgba(123,97,255,0.15); }
+
+    /* ── App ── */
+    #app {
+      display: none;
+      padding: 24px 16px 80px;
+    }
+    .inner { max-width: 880px; margin: 0 auto; }
+
+    /* ── User bar ── */
+    .user-bar {
+      display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+      margin-bottom: 20px;
+    }
+    .user-photo {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 2px solid var(--primary-light); object-fit: cover;
+    }
+    .user-name { font-size: 13px; font-weight: 600; color: var(--muted); }
 
     /* ── Header ── */
     .header { text-align: center; margin-bottom: 28px; }
@@ -44,14 +89,6 @@
     }
     .header h1 { font-size: 28px; font-weight: 800; }
     .header p { color: var(--muted); font-size: 14px; margin-top: 6px; }
-
-    /* ── New month banner ── */
-    .banner {
-      background: #FEF3C7; border-radius: 14px;
-      padding: 12px 16px; margin-bottom: 18px;
-      display: none; align-items: center; justify-content: space-between; gap: 12px;
-    }
-    .banner span { font-size: 13px; font-weight: 600; color: #92400E; }
 
     /* ── Bank bar ── */
     .bank-bar {
@@ -124,12 +161,8 @@
       padding: 24px 20px; box-shadow: var(--shadow);
       display: flex; flex-direction: column; align-items: center; gap: 16px;
     }
-
-    /* Jar shape */
     .jar-visual { display: flex; flex-direction: column; align-items: center; }
-    .jar-lid {
-      width: 88px; height: 12px; border-radius: 4px; z-index: 1;
-    }
+    .jar-lid { width: 88px; height: 12px; border-radius: 4px; z-index: 1; }
     .jar-neck {
       width: 68px; height: 16px;
       border-left: 3px solid; border-right: 3px solid;
@@ -141,33 +174,25 @@
       position: relative; overflow: hidden;
       background: rgba(255,255,255,0.12);
     }
-    /* glass shine */
     .jar-body::after {
       content: ''; position: absolute;
       top: 8%; left: 10%; width: 11%; height: 50%;
       background: rgba(255,255,255,.28); border-radius: 50%;
       pointer-events: none; z-index: 3;
     }
-
-    /* Expenses jar — orange */
     .jar-exp .jar-lid  { background: #FFA866; }
     .jar-exp .jar-neck { border-color: #FFA866; }
     .jar-exp .jar-body { border-color: #FFA866; }
     .jar-exp .jar-fill { background: linear-gradient(to top, #E8610F, #FFA040); }
     .jar-exp .wave     { background: #FF8C2A; }
-
-    /* Free money jar — purple */
     .jar-free .jar-lid  { background: #A58AFF; }
     .jar-free .jar-neck { border-color: #A58AFF; }
     .jar-free .jar-body { border-color: #A58AFF; }
     .jar-free .jar-fill { background: linear-gradient(to top, #5B3FFF, #A87AFF); }
     .jar-free .wave     { background: #7B5FFF; }
-
-    /* Fill + wave */
     .jar-fill {
       position: absolute; bottom: 0; left: 0; right: 0;
-      height: 0%; transition: height 1.4s cubic-bezier(.4,0,.2,1);
-      z-index: 1;
+      height: 0%; transition: height 1.4s cubic-bezier(.4,0,.2,1); z-index: 1;
     }
     .wave {
       position: absolute; top: -18px; left: -50%;
@@ -178,8 +203,6 @@
       0%,100% { transform: rotate(-2deg) translateX(0); }
       50%      { transform: rotate(2deg) translateX(-5%); }
     }
-
-    /* Jar info */
     .jar-info { text-align: center; width: 100%; }
     .jar-name { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 4px; }
     .jar-amt  { font-size: 26px; font-weight: 800; line-height: 1; }
@@ -204,7 +227,7 @@
     .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--primary); flex-shrink: 0; }
     .dot-o { background: var(--orange); }
 
-    /* ── Bills collapsible ── */
+    /* ── Bills ── */
     .bills-toggle-row {
       padding: 16px 20px; display: flex; align-items: center;
       justify-content: space-between; cursor: pointer; user-select: none;
@@ -228,7 +251,7 @@
       font-weight: 800; font-size: 15px;
     }
 
-    /* ── Income row ── */
+    /* ── Income ── */
     .income-row {
       display: flex; align-items: center; justify-content: space-between;
       padding: 8px 0; font-size: 14px;
@@ -274,7 +297,7 @@
     .pp { padding-left: 26px; }
     .sp { padding-right: 44px; }
 
-    /* ── Shift preview tiles ── */
+    /* ── Shift preview ── */
     .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
     .tile { background: #F9F9FB; border-radius: 12px; padding: 12px 14px; }
     .t-lbl {
@@ -285,8 +308,6 @@
     .t-val { font-size: 20px; font-weight: 800; }
     .t-val.neg { color: #EF4444; }
     .cap { font-size: 9px; font-weight: 800; background: #FEF3C7; color: #D97706; padding: 2px 6px; border-radius: 100px; }
-
-    /* Hero */
     .hero {
       background: linear-gradient(135deg, #7B61FF, #B45FE0);
       border-radius: var(--r); padding: 20px; text-align: center; color: #fff;
@@ -319,17 +340,40 @@
   </style>
 </head>
 <body>
-<div class="app">
+
+<!-- ── Login screen ── -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-emoji">🫙</div>
+    <h1>Money Jars</h1>
+    <p>Expenses first.<br>Then what's yours to keep.</p>
+    <button class="btn-google" id="btn-sign-in">
+      <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+      </svg>
+      Sign in with Google
+    </button>
+  </div>
+</div>
+
+<!-- ── App ── -->
+<div id="app">
+<div class="inner">
+
+  <!-- User bar -->
+  <div class="user-bar">
+    <img class="user-photo" id="user-photo" src="" alt="">
+    <span class="user-name" id="user-name"></span>
+    <button class="btn btn-ghost-sm" id="btn-sign-out">Sign out</button>
+  </div>
 
   <div class="header">
     <div class="badge">🫙 Money Jars</div>
     <h1>Expenses first. Then what's yours.</h1>
     <p>Fill the bills jar before the free money jar can grow.</p>
-  </div>
-
-  <div class="banner" id="banner">
-    <span>🗓️ It's a new month — ready to start fresh?</span>
-    <button class="btn btn-ghost-sm" onclick="resetMonth()">New Month</button>
   </div>
 
   <!-- Bank balance -->
@@ -346,13 +390,12 @@
         <span class="pfx-icon">$</span>
         <input type="number" class="bank-inp" id="bank-inp" placeholder="0.00" min="0" step="0.01">
       </div>
-      <button class="btn btn-purple-sm" onclick="saveBank()">Update</button>
+      <button class="btn btn-purple-sm" id="btn-bank">Update</button>
     </div>
   </div>
 
   <!-- Two jars -->
   <div class="jars-row">
-
     <div class="jar-card jar-exp">
       <div class="jar-visual">
         <div class="jar-lid"></div>
@@ -368,7 +411,6 @@
         <span class="jar-pill" id="j1-pill">0%</span>
       </div>
     </div>
-
     <div class="jar-card jar-free">
       <div class="jar-visual">
         <div class="jar-lid"></div>
@@ -384,12 +426,11 @@
         <span class="jar-pill" id="j2-pill" style="display:none">0%</span>
       </div>
     </div>
-
   </div>
 
   <!-- Bills breakdown -->
   <div class="card" style="padding:0; margin-bottom:16px">
-    <div class="bills-toggle-row" id="bills-toggle" onclick="toggleBills()">
+    <div class="bills-toggle-row" id="bills-toggle">
       <span>🧾 Monthly Bills</span>
       <span>▾</span>
     </div>
@@ -419,14 +460,12 @@
 
   <!-- Shift calc + Paychecks -->
   <div class="two-col">
-
     <div class="card" style="margin-bottom:0">
       <div class="sec-title"><div class="dot"></div>Log a Shift</div>
-
       <div class="ig">
         <div class="il">Miles Driven</div>
         <div class="iw">
-          <input type="number" id="s-mi" placeholder="0" min="0" step="0.1" class="sp" oninput="calcShift()">
+          <input type="number" id="s-mi" placeholder="0" min="0" step="0.1" class="sp">
           <span class="sfx">mi</span>
         </div>
       </div>
@@ -434,13 +473,13 @@
         <div class="il">Gross Earnings</div>
         <div class="iw">
           <span class="pfx">$</span>
-          <input type="number" id="s-earn" placeholder="0.00" min="0" step="0.01" class="pp" oninput="calcShift()">
+          <input type="number" id="s-earn" placeholder="0.00" min="0" step="0.01" class="pp">
         </div>
       </div>
       <div class="ig">
         <div class="il">Hours Worked</div>
         <div class="iw">
-          <input type="number" id="s-hrs" placeholder="0.0" min="0" step="0.1" class="sp" oninput="calcShift()">
+          <input type="number" id="s-hrs" placeholder="0.0" min="0" step="0.1" class="sp">
           <span class="sfx">hrs</span>
         </div>
       </div>
@@ -448,18 +487,17 @@
         <div class="il">Gas Price</div>
         <div class="iw">
           <span class="pfx">$</span>
-          <input type="number" id="s-gas" placeholder="0.00" min="0" step="0.01" class="pp sp" oninput="calcShift()">
+          <input type="number" id="s-gas" placeholder="0.00" min="0" step="0.01" class="pp sp">
           <span class="sfx">/ gal</span>
         </div>
       </div>
       <div class="ig">
         <div class="il">Rolling MPG <span class="saved">saved</span></div>
         <div class="iw">
-          <input type="number" id="s-mpg" placeholder="0.0" min="1" step="0.1" class="sp" oninput="onMpg()">
+          <input type="number" id="s-mpg" placeholder="0.0" min="1" step="0.1" class="sp">
           <span class="sfx">mpg</span>
         </div>
       </div>
-
       <div id="shift-preview" style="display:none">
         <div class="tiles">
           <div class="tile">
@@ -484,7 +522,7 @@
           <div class="hero-val" id="p-hero">—</div>
           <div class="hero-sub">after gas & rent</div>
         </div>
-        <button class="btn-full btn-purple-full" onclick="logShift()">Log this shift →</button>
+        <button class="btn-full btn-purple-full" id="btn-log-shift">Log this shift →</button>
       </div>
     </div>
 
@@ -501,285 +539,317 @@
         <div class="il">Label (optional)</div>
         <input type="text" id="pc-lbl" placeholder="Regular job, tips…">
       </div>
-      <button class="btn-full btn-orange-full" onclick="addPaycheck()">Add Paycheck →</button>
+      <button class="btn-full btn-orange-full" id="btn-add-paycheck">Add Paycheck →</button>
 
       <div style="margin-top:18px">
         <div class="sec-title" style="margin-bottom:8px"><div class="dot dot-o"></div>Paycheck Log</div>
         <div id="pay-log"><div class="log-empty">No paychecks yet</div></div>
       </div>
-
       <div style="margin-top:18px">
         <div class="sec-title" style="margin-bottom:8px"><div class="dot"></div>Shift Log</div>
         <div id="shift-log"><div class="log-empty">No shifts yet</div></div>
       </div>
     </div>
-
   </div>
+
+</div>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<script>
-  // ── Constants ───────────────────────────────────────────────
-  const RENT_CAP = 450;
-  const BILLS = [
-    { name: 'Rent',          emoji: '🏠', amount: 0,   dynamic: true },
-    { name: 'Insurance',     emoji: '🛡️', amount: 100 },
-    { name: 'Storage',       emoji: '📦', amount: 100 },
-    { name: 'Phone',         emoji: '📱', amount: 25  },
-    { name: 'Claude',        emoji: '🤖', amount: 20  },
-    { name: 'Netflix',       emoji: '🎬', amount: 10  },
-    { name: 'Disney/Hulu',   emoji: '🎭', amount: 6   },
-    { name: 'Spotify',       emoji: '🎵', amount: 12  },
-    { name: 'Gas',           emoji: '⛽', amount: 161 },
-    { name: 'Weed',          emoji: '🌿', amount: 60  },
-    { name: 'Pet food',      emoji: '🐾', amount: 100 },
-    { name: 'Buffer',        emoji: '✨', amount: 50  },
-  ];
-  const FIXED = 644; // sum of non-rent bills
+<script type="module">
+import { initializeApp }                                    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup,
+         signOut, onAuthStateChanged }                      from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getFirestore, doc, getDoc, setDoc }                from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-  // ── State ───────────────────────────────────────────────────
-  let S = { bank: 0, mpg: 0, shifts: [], paychecks: [] };
+// ── Firebase init ────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey:            'AIzaSyBbCjfCUq9zL0hrnGmlQTct-U0inOAnQYw',
+  authDomain:        'money-jars-7eceb.firebaseapp.com',
+  projectId:         'money-jars-7eceb',
+  storageBucket:     'money-jars-7eceb.firebasestorage.app',
+  messagingSenderId: '1041627377114',
+  appId:             '1:1041627377114:web:f87e9e960a5c061d8c24e3',
+};
+const fbApp    = initializeApp(firebaseConfig);
+const auth     = getAuth(fbApp);
+const db       = getFirestore(fbApp);
+const provider = new GoogleAuthProvider();
 
-  function month() {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+// ── Constants ────────────────────────────────────────────────
+const RENT_CAP = 450;
+const BILLS = [
+  { name: 'Rent',         emoji: '🏠', amount: 0,   dynamic: true },
+  { name: 'Insurance',    emoji: '🛡️', amount: 100 },
+  { name: 'Storage',      emoji: '📦', amount: 100 },
+  { name: 'Phone',        emoji: '📱', amount: 25  },
+  { name: 'Claude',       emoji: '🤖', amount: 20  },
+  { name: 'Netflix',      emoji: '🎬', amount: 10  },
+  { name: 'Disney/Hulu',  emoji: '🎭', amount: 6   },
+  { name: 'Spotify',      emoji: '🎵', amount: 12  },
+  { name: 'Gas',          emoji: '⛽', amount: 161 },
+  { name: 'Weed',         emoji: '🌿', amount: 60  },
+  { name: 'Pet food',     emoji: '🐾', amount: 100 },
+  { name: 'Buffer',       emoji: '✨', amount: 50  },
+];
+const FIXED = 644;
+
+// ── App state ────────────────────────────────────────────────
+let uid     = null;
+let S       = { bank: 0, mpg: 0, shifts: [], paychecks: [] };
+let preview = null;
+
+function month() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+
+// ── Derived ──────────────────────────────────────────────────
+const rentPaid   = () => S.shifts.reduce((a, s) => a + s.rentShare, 0);
+const gigIncome  = () => S.shifts.reduce((a, s) => a + s.takeHome,  0);
+const payIncome  = () => S.paychecks.reduce((a, p) => a + p.amount, 0);
+const totalIn    = () => S.bank + gigIncome() + payIncome();
+const jar1Target = () => FIXED + Math.min(rentPaid(), RENT_CAP);
+const jar1Amt    = () => Math.min(totalIn(), jar1Target());
+const jar2Amt    = () => Math.max(0, totalIn() - jar1Target());
+
+// ── Firestore ────────────────────────────────────────────────
+async function loadData() {
+  const settSnap = await getDoc(doc(db, 'users', uid, 'data', 'settings'));
+  if (settSnap.exists()) {
+    const d = settSnap.data();
+    S.bank = d.bank || 0;
+    S.mpg  = d.mpg  || 0;
   }
-
-  function load() {
-    S.bank = +(localStorage.getItem('mj_bank') || 0);
-    S.mpg  = +(localStorage.getItem('mj_mpg')  || 0);
-    const stored = localStorage.getItem('mj_month');
-    if (stored === month()) {
-      try { S.shifts    = JSON.parse(localStorage.getItem('mj_shifts')    || '[]'); } catch { S.shifts = []; }
-      try { S.paychecks = JSON.parse(localStorage.getItem('mj_checks')    || '[]'); } catch { S.paychecks = []; }
-    } else {
-      S.shifts = []; S.paychecks = [];
-      if (stored) show('banner');
-    }
-  }
-
-  function persist() {
-    localStorage.setItem('mj_month',  month());
-    localStorage.setItem('mj_shifts', JSON.stringify(S.shifts));
-    localStorage.setItem('mj_checks', JSON.stringify(S.paychecks));
-  }
-
-  // ── Derived ─────────────────────────────────────────────────
-  const rentPaid   = () => S.shifts.reduce((a, s) => a + s.rentShare, 0);
-  const gigIncome  = () => S.shifts.reduce((a, s) => a + s.takeHome, 0);
-  const payIncome  = () => S.paychecks.reduce((a, p) => a + p.amount, 0);
-  const totalIn    = () => S.bank + gigIncome() + payIncome();
-  const jar1Target = () => FIXED + Math.min(rentPaid(), RENT_CAP);
-  const jar1Amt    = () => Math.min(totalIn(), jar1Target());
-  const jar2Amt    = () => Math.max(0, totalIn() - jar1Target());
-
-  // ── Actions ─────────────────────────────────────────────────
-  function saveBank() {
-    S.bank = +(document.getElementById('bank-inp').value) || 0;
-    localStorage.setItem('mj_bank', S.bank);
-    document.getElementById('bank-display').textContent = fmt(S.bank);
-    toast('🏦 Balance updated');
-  }
-
-  function onMpg() {
-    const v = +(document.getElementById('s-mpg').value);
-    if (v > 0) { S.mpg = v; localStorage.setItem('mj_mpg', v); }
-    calcShift();
-  }
-
-  function resetMonth() {
+  const mSnap = await getDoc(doc(db, 'users', uid, 'months', month()));
+  if (mSnap.exists()) {
+    const d = mSnap.data();
+    S.shifts    = d.shifts    || [];
+    S.paychecks = d.paychecks || [];
+  } else {
     S.shifts = []; S.paychecks = [];
-    persist();
-    hide('banner');
-    refreshAll();
-    toast('🎉 New month started!');
   }
+}
 
-  // ── Shift calculator ─────────────────────────────────────────
-  let preview = null;
+async function saveSettings() {
+  if (!uid) return;
+  await setDoc(doc(db, 'users', uid, 'data', 'settings'), { bank: S.bank, mpg: S.mpg });
+}
 
-  function calcShift() {
-    const mi   = +(document.getElementById('s-mi').value)   || 0;
-    const earn = +(document.getElementById('s-earn').value) || 0;
-    const hrs  = +(document.getElementById('s-hrs').value)  || 0;
-    const gas  = +(document.getElementById('s-gas').value)  || 0;
-    const mpg  = +(document.getElementById('s-mpg').value)  || 0;
+async function saveMonthData() {
+  if (!uid) return;
+  await setDoc(doc(db, 'users', uid, 'months', month()), {
+    shifts: S.shifts, paychecks: S.paychecks,
+  });
+}
 
-    if (!earn && !mi) { hide('shift-preview'); preview = null; return; }
-
-    const gasCost = mpg > 0 ? (mi / mpg) * gas : 0;
-    const rRaw    = earn * 0.30;
-    const rPaid   = rentPaid();
-    let rentShare, capped;
-    if (rPaid + rRaw > RENT_CAP) {
-      rentShare = Math.max(0, RENT_CAP - rPaid);
-      capped = true;
-    } else {
-      rentShare = rRaw;
-      capped = false;
+// ── Auth ─────────────────────────────────────────────────────
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    uid = user.uid;
+    document.getElementById('user-photo').src        = user.photoURL || '';
+    document.getElementById('user-name').textContent = user.displayName || user.email;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display          = 'block';
+    await loadData();
+    if (S.mpg)  document.getElementById('s-mpg').value    = S.mpg;
+    if (S.bank) {
+      document.getElementById('bank-inp').value            = S.bank;
+      document.getElementById('bank-display').textContent  = fmt(S.bank);
     }
-    const takeHome = earn - gasCost - rentShare;
-    const hourly   = hrs > 0 ? takeHome / hrs : null;
-
-    preview = { mi, earn, hrs, gasCost, rentShare, takeHome, hourly };
-
-    set('p-gas',  `−${fmt(gasCost)}`);
-    set('p-rent', `−${fmt(rentShare)}`);
-    set('p-home', fmt(takeHome));
-    set('p-hrly', hourly !== null ? fmt(hourly) : '—');
-    set('p-hero', hourly !== null ? fmt(hourly) : '—');
-    document.getElementById('p-cap').style.display = capped ? 'inline' : 'none';
-    show('shift-preview');
-  }
-
-  function logShift() {
-    if (!preview) return;
-    S.shifts.push({
-      id: Date.now(),
-      date: new Date().toLocaleDateString('en-US', { month:'short', day:'numeric' }),
-      mi: preview.mi, earn: preview.earn, hrs: preview.hrs,
-      gasCost: preview.gasCost, rentShare: preview.rentShare, takeHome: preview.takeHome,
-    });
-    persist();
-    ['s-mi','s-earn','s-hrs','s-gas'].forEach(id => document.getElementById(id).value = '');
-    hide('shift-preview');
-    preview = null;
-    refreshAll();
-    toast(`✅ Shift logged — ${fmt(S.shifts.at(-1).takeHome)} going into jars`);
-  }
-
-  function addPaycheck() {
-    const amt = +(document.getElementById('pc-amt').value) || 0;
-    const lbl = document.getElementById('pc-lbl').value.trim() || 'Paycheck';
-    if (amt <= 0) { toast('⚠️ Enter an amount first'); return; }
-    S.paychecks.push({
-      id: Date.now(),
-      date: new Date().toLocaleDateString('en-US', { month:'short', day:'numeric' }),
-      amount: amt, label: lbl,
-    });
-    persist();
-    document.getElementById('pc-amt').value = '';
-    document.getElementById('pc-lbl').value = '';
-    refreshAll();
-    toast(`💼 ${fmt(amt)} added from ${lbl}`);
-  }
-
-  // ── Rendering ─────────────────────────────────────────────
-  function refreshAll() {
-    refreshJars();
-    refreshIncome();
     renderBills();
-    renderLogs();
+    refreshAll();
+  } else {
+    uid = null;
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app').style.display          = 'none';
   }
+});
 
-  function refreshJars() {
-    const t1  = jar1Target();
-    const a1  = jar1Amt();
-    const a2  = jar2Amt();
-    const p1  = t1 > 0 ? Math.min(100, (a1 / t1) * 100) : 0;
-    const p2  = t1 > 0 ? Math.min(100, (a2 / t1) * 100) : 0;
+// ── Actions ──────────────────────────────────────────────────
+function saveBank() {
+  S.bank = +(document.getElementById('bank-inp').value) || 0;
+  document.getElementById('bank-display').textContent = fmt(S.bank);
+  saveSettings();
+  refreshJars();
+  refreshIncome();
+  toast('🏦 Balance updated');
+}
 
-    setFill('j1-fill', p1);
-    set('j1-amt',  fmt(a1));
-    set('j1-sub',  `of ${fmt(t1)} covered`);
-    set('j1-pill', `${Math.round(p1)}% covered`);
+function onMpg() {
+  const v = +(document.getElementById('s-mpg').value);
+  if (v > 0) { S.mpg = v; saveSettings(); }
+  calcShift();
+}
 
-    setFill('j2-fill', p2);
-    set('j2-amt', fmt(a2));
-    const pill2 = document.getElementById('j2-pill');
-    if (a2 > 0) {
-      pill2.style.display = 'inline-block';
-      pill2.textContent = a2 >= t1 ? '🎉 overflowing!' : `${Math.round(p2)}% of bills extra`;
-    } else {
-      pill2.style.display = 'none';
-    }
+function calcShift() {
+  const mi   = +(document.getElementById('s-mi').value)   || 0;
+  const earn = +(document.getElementById('s-earn').value) || 0;
+  const hrs  = +(document.getElementById('s-hrs').value)  || 0;
+  const gas  = +(document.getElementById('s-gas').value)  || 0;
+  const mpg  = +(document.getElementById('s-mpg').value)  || 0;
+
+  if (!earn && !mi) { document.getElementById('shift-preview').style.display = 'none'; preview = null; return; }
+
+  const gasCost = mpg > 0 ? (mi / mpg) * gas : 0;
+  const rRaw    = earn * 0.30;
+  const rPaid   = rentPaid();
+  let rentShare, capped;
+  if (rPaid + rRaw > RENT_CAP) {
+    rentShare = Math.max(0, RENT_CAP - rPaid); capped = true;
+  } else {
+    rentShare = rRaw; capped = false;
   }
+  const takeHome = earn - gasCost - rentShare;
+  const hourly   = hrs > 0 ? takeHome / hrs : null;
 
-  function setFill(id, pct) {
-    const el = document.getElementById(id);
-    el.style.height = `${pct}%`;
-    el.querySelector('.wave').style.visibility = pct < 2 ? 'hidden' : 'visible';
+  preview = { mi, earn, hrs, gasCost, rentShare, takeHome, hourly };
+  set('p-gas',  `−${fmt(gasCost)}`);
+  set('p-rent', `−${fmt(rentShare)}`);
+  set('p-home', fmt(takeHome));
+  set('p-hrly', hourly !== null ? fmt(hourly) : '—');
+  set('p-hero', hourly !== null ? fmt(hourly) : '—');
+  document.getElementById('p-cap').style.display = capped ? 'inline' : 'none';
+  document.getElementById('shift-preview').style.display = 'block';
+}
+
+function logShift() {
+  if (!preview) return;
+  S.shifts.push({
+    id: Date.now(),
+    date: new Date().toLocaleDateString('en-US', { month:'short', day:'numeric' }),
+    mi: preview.mi, earn: preview.earn, hrs: preview.hrs,
+    gasCost: preview.gasCost, rentShare: preview.rentShare, takeHome: preview.takeHome,
+  });
+  saveMonthData();
+  ['s-mi','s-earn','s-hrs','s-gas'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('shift-preview').style.display = 'none';
+  preview = null;
+  refreshAll();
+  toast(`✅ Shift logged — ${fmt(S.shifts.at(-1).takeHome)} going into jars`);
+}
+
+function addPaycheck() {
+  const amt = +(document.getElementById('pc-amt').value) || 0;
+  const lbl = document.getElementById('pc-lbl').value.trim() || 'Paycheck';
+  if (amt <= 0) { toast('⚠️ Enter an amount first'); return; }
+  S.paychecks.push({
+    id: Date.now(),
+    date: new Date().toLocaleDateString('en-US', { month:'short', day:'numeric' }),
+    amount: amt, label: lbl,
+  });
+  saveMonthData();
+  document.getElementById('pc-amt').value = '';
+  document.getElementById('pc-lbl').value = '';
+  refreshAll();
+  toast(`💼 ${fmt(amt)} added from ${lbl}`);
+}
+
+function toggleBills() {
+  document.getElementById('bills-inner').classList.toggle('open');
+  document.getElementById('bills-toggle').classList.toggle('open');
+}
+
+// ── Rendering ────────────────────────────────────────────────
+function refreshAll() { refreshJars(); refreshIncome(); renderLogs(); }
+
+function refreshJars() {
+  const t1 = jar1Target(), a1 = jar1Amt(), a2 = jar2Amt();
+  const p1 = t1 > 0 ? Math.min(100, (a1 / t1) * 100) : 0;
+  const p2 = t1 > 0 ? Math.min(100, (a2 / t1) * 100) : 0;
+
+  setFill('j1-fill', p1);
+  set('j1-amt',  fmt(a1));
+  set('j1-sub',  `of ${fmt(t1)} covered`);
+  set('j1-pill', `${Math.round(p1)}% covered`);
+
+  setFill('j2-fill', p2);
+  set('j2-amt', fmt(a2));
+  const pill2 = document.getElementById('j2-pill');
+  if (a2 > 0) {
+    pill2.style.display = 'inline-block';
+    pill2.textContent = a2 >= t1 ? '🎉 overflowing!' : `${Math.round(p2)}% of bills extra`;
+  } else {
+    pill2.style.display = 'none';
   }
+}
 
-  function refreshIncome() {
-    set('inc-bank',  fmt(S.bank));
-    set('inc-gig',   fmt(gigIncome()));
-    set('inc-pay',   fmt(payIncome()));
-    set('inc-total', fmt(totalIn()));
-  }
+function setFill(id, pct) {
+  const el = document.getElementById(id);
+  el.style.height = `${pct}%`;
+  el.querySelector('.wave').style.visibility = pct < 2 ? 'hidden' : 'visible';
+}
 
-  function renderBills() {
-    const rp = rentPaid();
-    const rows = BILLS.map(b => {
-      if (b.dynamic) {
-        return `<div class="bill-row">
-          <div class="bill-left"><span>${b.emoji}</span><span>${b.name}</span></div>
-          <span class="bill-amt"><span class="bill-dyn">${fmt(Math.min(rp, RENT_CAP))}</span> / ${fmt(RENT_CAP)} cap</span>
-        </div>`;
-      }
+function refreshIncome() {
+  set('inc-bank',  fmt(S.bank));
+  set('inc-gig',   fmt(gigIncome()));
+  set('inc-pay',   fmt(payIncome()));
+  set('inc-total', fmt(totalIn()));
+}
+
+function renderBills() {
+  const rp = rentPaid();
+  const rows = BILLS.map(b => {
+    if (b.dynamic) {
       return `<div class="bill-row">
         <div class="bill-left"><span>${b.emoji}</span><span>${b.name}</span></div>
-        <span class="bill-amt">${fmt(b.amount)}</span>
+        <span class="bill-amt"><span class="bill-dyn">${fmt(Math.min(rp, RENT_CAP))}</span> / ${fmt(RENT_CAP)} cap</span>
       </div>`;
-    }).join('');
+    }
+    return `<div class="bill-row">
+      <div class="bill-left"><span>${b.emoji}</span><span>${b.name}</span></div>
+      <span class="bill-amt">${fmt(b.amount)}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('bills-inner').innerHTML = `${rows}
+    <div class="bills-total"><span>Monthly total</span><span>${fmt(jar1Target())}</span></div>`;
+}
 
-    document.getElementById('bills-inner').innerHTML = `
-      ${rows}
-      <div class="bills-total"><span>Monthly total</span><span>${fmt(jar1Target())}</span></div>
-    `;
-  }
+function renderLogs() {
+  const sl = document.getElementById('shift-log');
+  const pl = document.getElementById('pay-log');
+  sl.innerHTML = S.shifts.length
+    ? [...S.shifts].reverse().slice(0,6).map(s =>
+        `<div class="log-item">
+          <span class="log-l">${s.date} · ${s.mi}mi · ${fmt(s.earn)} gross</span>
+          <span class="log-r">${fmt(s.takeHome)}</span>
+        </div>`).join('')
+    : '<div class="log-empty">No shifts yet</div>';
+  pl.innerHTML = S.paychecks.length
+    ? [...S.paychecks].reverse().slice(0,6).map(p =>
+        `<div class="log-item">
+          <span class="log-l">${p.date} · ${p.label}</span>
+          <span class="log-r">${fmt(p.amount)}</span>
+        </div>`).join('')
+    : '<div class="log-empty">No paychecks yet</div>';
+}
 
-  function renderLogs() {
-    const sl = document.getElementById('shift-log');
-    const pl = document.getElementById('pay-log');
+// ── Helpers ──────────────────────────────────────────────────
+function fmt(n) {
+  return new Intl.NumberFormat('en-US', { style:'currency', currency:'USD', minimumFractionDigits:2 }).format(n);
+}
+function set(id, v) { document.getElementById(id).textContent = v; }
 
-    sl.innerHTML = S.shifts.length
-      ? [...S.shifts].reverse().slice(0, 6).map(s =>
-          `<div class="log-item">
-            <span class="log-l">${s.date} · ${s.mi}mi · ${fmt(s.earn)} gross</span>
-            <span class="log-r">${fmt(s.takeHome)}</span>
-          </div>`).join('')
-      : '<div class="log-empty">No shifts yet</div>';
+let _tt;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(_tt); _tt = setTimeout(() => el.classList.remove('show'), 3200);
+}
 
-    pl.innerHTML = S.paychecks.length
-      ? [...S.paychecks].reverse().slice(0, 6).map(p =>
-          `<div class="log-item">
-            <span class="log-l">${p.date} · ${p.label}</span>
-            <span class="log-r">${fmt(p.amount)}</span>
-          </div>`).join('')
-      : '<div class="log-empty">No paychecks yet</div>';
-  }
-
-  function toggleBills() {
-    document.getElementById('bills-inner').classList.toggle('open');
-    document.getElementById('bills-toggle').classList.toggle('open');
-  }
-
-  // ── Helpers ─────────────────────────────────────────────────
-  function fmt(n) {
-    return new Intl.NumberFormat('en-US', { style:'currency', currency:'USD', minimumFractionDigits:2 }).format(n);
-  }
-  function set(id, v) { document.getElementById(id).textContent = v; }
-  function show(id) { document.getElementById(id).style.display = 'flex'; }
-  function hide(id) { document.getElementById(id).style.display = 'none'; }
-
-  let _tt;
-  function toast(msg) {
-    const el = document.getElementById('toast');
-    el.textContent = msg; el.classList.add('show');
-    clearTimeout(_tt); _tt = setTimeout(() => el.classList.remove('show'), 3200);
-  }
-
-  // ── Boot ────────────────────────────────────────────────────
-  window.addEventListener('DOMContentLoaded', () => {
-    load();
-    document.getElementById('bank-display').textContent = fmt(S.bank);
-    if (S.bank) document.getElementById('bank-inp').value = S.bank;
-    if (S.mpg)  document.getElementById('s-mpg').value   = S.mpg;
-    renderBills();
-    refreshAll();
-  });
+// ── Wire up events ───────────────────────────────────────────
+document.getElementById('btn-sign-in').addEventListener('click',  () => signInWithPopup(auth, provider).catch(() => toast('⚠️ Sign in failed')));
+document.getElementById('btn-sign-out').addEventListener('click', () => signOut(auth));
+document.getElementById('btn-bank').addEventListener('click',     saveBank);
+document.getElementById('btn-log-shift').addEventListener('click', logShift);
+document.getElementById('btn-add-paycheck').addEventListener('click', addPaycheck);
+document.getElementById('bills-toggle').addEventListener('click', toggleBills);
+document.getElementById('s-mi').addEventListener('input',   calcShift);
+document.getElementById('s-earn').addEventListener('input',  calcShift);
+document.getElementById('s-hrs').addEventListener('input',   calcShift);
+document.getElementById('s-gas').addEventListener('input',   calcShift);
+document.getElementById('s-mpg').addEventListener('input',   onMpg);
 </script>
 </body>
 </html>

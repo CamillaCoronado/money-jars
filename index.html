@@ -400,6 +400,10 @@
   <div class="card">
     <div class="sec-title"><div class="dot"></div>Income This Month</div>
     <div class="income-row">
+      <span class="income-lbl">🏦 Bank balance</span>
+      <span class="income-val" id="inc-bank">$0.00</span>
+    </div>
+    <div class="income-row">
       <span class="income-lbl">🚗 Gig take-home</span>
       <span class="income-val" id="inc-gig">$0.00</span>
     </div>
@@ -565,7 +569,7 @@
   const rentPaid   = () => S.shifts.reduce((a, s) => a + s.rentShare, 0);
   const gigIncome  = () => S.shifts.reduce((a, s) => a + s.takeHome, 0);
   const payIncome  = () => S.paychecks.reduce((a, p) => a + p.amount, 0);
-  const totalIn    = () => gigIncome() + payIncome();
+  const totalIn    = () => S.bank + gigIncome() + payIncome();
   const jar1Target = () => FIXED + Math.min(rentPaid(), RENT_CAP);
   const jar1Amt    = () => Math.min(totalIn(), jar1Target());
   const jar2Amt    = () => Math.max(0, totalIn() - jar1Target());
@@ -699,6 +703,7 @@
   }
 
   function refreshIncome() {
+    set('inc-bank',  fmt(S.bank));
     set('inc-gig',   fmt(gigIncome()));
     set('inc-pay',   fmt(payIncome()));
     set('inc-total', fmt(totalIn()));

@@ -9,24 +9,26 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #FFFBF0;
+      --bg: #FEF6E4;
       --surface: #FFFFFF;
-      --primary: #8B6FD4;
-      --primary-light: #F0EAFF;
-      --text: #2D1F00;
-      --muted: #8B7355;
-      --border: #E8D8A0;
+      --primary: #bb8ac2;
+      --primary-light: #F4EBF8;
+      --text: #3D2800;
+      --muted: #9B7E6A;
+      --border: #F0D9B5;
       --green: #059669;
       --green-light: #D1FAE5;
       --orange: #F97316;
       --orange-light: #FFF0E6;
       --bee-yellow: #FFD93D;
-      --bee-dark: #2D1F00;
-      --bee-light: #FFFBDC;
-      --puppy-pink: #F9A8D4;
-      --puppy-lavender: #C4B5FD;
+      --bee-peach: #f6c18c;
+      --bee-dark: #3D2000;
+      --bee-light: #FEF6E4;
+      --puppy-pink: #e39498;
+      --puppy-purple: #bb8ac2;
+      --puppy-blue: #71a1c5;
       --r: 20px;
-      --shadow: 0 2px 16px rgba(139,111,212,0.10);
+      --shadow: 0 2px 16px rgba(187,138,194,0.13);
     }
 
     body {
@@ -208,31 +210,36 @@
       pointer-events: none; z-index: 3;
     }
     /* Bills jar — Bee themed */
+    /* Bills jar — stacked gold coins */
     .jar-exp .jar-lid  { background: var(--bee-yellow); }
     .jar-exp .jar-neck { border-color: var(--bee-dark); }
     .jar-exp .jar-body { border-color: var(--bee-dark); border-width: 4px; }
     .jar-exp .jar-fill {
-      background:
-        radial-gradient(circle at 30% 60%, rgba(255,255,255,.38) 22%, transparent 24%),
-        radial-gradient(circle at 70% 40%, rgba(255,255,255,.32) 20%, transparent 22%),
-        radial-gradient(circle at 50% 80%, rgba(255,255,255,.30) 18%, transparent 20%),
-        linear-gradient(to top, #9A6B00, #D4970A 20%, #FFD93D 55%, #FFF4A8);
-      background-size: 26px 26px, 26px 26px, 26px 26px, 100% 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        #3D2000 0px,  #3D2000 2px,
+        #B87800 2px,  #B87800 4px,
+        #FFD93D 4px,  #FFF4A0 13px,
+        #B87800 13px, #B87800 15px
+      );
     }
-    .jar-exp .wave     { background: #FFC107; }
-    /* Free money jar — PuppyCat themed */
+    .jar-exp .wave { display: none; }
+    /* Free money jar — stacked dollar bills (PuppyCat) */
     .jar-free .jar-lid  { background: var(--puppy-pink); }
-    .jar-free .jar-neck { border-color: var(--primary); }
-    .jar-free .jar-body { border-color: var(--primary); border-width: 4px; }
+    .jar-free .jar-neck { border-color: var(--puppy-purple); }
+    .jar-free .jar-body { border-color: var(--puppy-purple); border-width: 4px; }
     .jar-free .jar-fill {
-      background:
-        repeating-linear-gradient(-8deg, transparent 0, transparent 11px, rgba(255,255,255,.12) 11px, rgba(255,255,255,.12) 13px),
-        repeating-linear-gradient(82deg,  transparent 0, transparent 18px, rgba(255,255,255,.07) 18px, rgba(255,255,255,.07) 20px),
-        linear-gradient(to top, #4C2D8F, #8B6FD4 40%, #C4B5FD 75%, #EDE9FF);
+      background: repeating-linear-gradient(
+        0deg,
+        #2D1060 0px,  #2D1060 2px,
+        #7B4FA5 2px,  #7B4FA5 4px,
+        #C4A0DC 4px,  #F0E5F8 19px,
+        #7B4FA5 19px, #7B4FA5 21px
+      );
     }
-    .jar-free .wave     { background: #A78BFA; }
-    .jar-exp  .jar-pill { background: var(--bee-light); color: #9A6B00; }
-    .jar-free .jar-pill { background: var(--primary-light); color: var(--primary); }
+    .jar-free .wave { display: none; }
+    .jar-exp  .jar-pill { background: #FFF4A0; color: #3D2000; }
+    .jar-free .jar-pill { background: var(--primary-light); color: var(--puppy-purple); }
     .jar-fill {
       position: absolute; bottom: 0; left: 0; right: 0;
       height: 0%; transition: height 1.2s cubic-bezier(.34,1.56,.64,1); z-index: 1;
@@ -254,9 +261,9 @@
       100% { transform: scale(1); }
     }
     @keyframes coin-fall {
-      0%   { transform: translateY(-40px) rotate(0deg) scale(1); opacity: 1; }
-      80%  { opacity: 1; }
-      100% { transform: translateY(120px) rotate(360deg) scale(.6); opacity: 0; }
+      0%   { transform: translateY(-30px) rotateY(0deg) scale(1.4); opacity: 1; }
+      50%  { transform: translateY(60px) rotateY(540deg) scale(1); opacity: 1; }
+      100% { transform: translateY(140px) rotateY(1080deg) scale(0.4); opacity: 0; }
     }
     @keyframes pop-up {
       0%   { transform: translateY(0) scale(1); opacity: 1; }
@@ -273,8 +280,9 @@
     .jar-card { transition: transform .15s; }
     .jar-bounce { animation: jar-bounce .55s cubic-bezier(.34,1.56,.64,1); }
     .coin-particle {
-      position: absolute; font-size: 18px; pointer-events: none; z-index: 10;
-      animation: coin-fall .7s ease-in forwards;
+      position: absolute; font-size: 26px; pointer-events: none; z-index: 10;
+      animation: coin-fall .8s ease-in forwards;
+      transform-style: preserve-3d;
     }
     .pop-label {
       position: absolute; font-size: 14px; font-weight: 800; pointer-events: none;
@@ -991,9 +999,7 @@ function checkMilestones(jarEl, prev, curr, key) {
 }
 
 function setFill(id, pct) {
-  const el = document.getElementById(id);
-  el.style.height = `${pct}%`;
-  el.querySelector('.wave').style.visibility = pct < 2 ? 'hidden' : 'visible';
+  document.getElementById(id).style.height = `${pct}%`;
 }
 
 function refreshIncome() {
@@ -1089,14 +1095,15 @@ function soundMilestone() {
 // ── Particle helpers ─────────────────────────────────────────
 function spawnCoins(jarEl, count = 3) {
   const body = jarEl.querySelector('.jar-body');
-  const rect = body.getBoundingClientRect();
+  const isFree = jarEl.classList.contains('jar-free');
+  const symbols = isFree ? ['💵','💵','✨','💜'] : ['🪙','🪙','⭐','🪙'];
   for (let i = 0; i < count; i++) {
     const el = document.createElement('span');
     el.className = 'coin-particle';
-    el.textContent = '🪙';
-    el.style.left = (20 + Math.random() * 60) + '%';
-    el.style.top = '0';
-    el.style.animationDelay = (i * 0.12) + 's';
+    el.textContent = symbols[i % symbols.length];
+    el.style.left = (10 + Math.random() * 70) + '%';
+    el.style.top = '-10px';
+    el.style.animationDelay = (i * 0.11) + 's';
     body.appendChild(el);
     el.addEventListener('animationend', () => el.remove());
   }

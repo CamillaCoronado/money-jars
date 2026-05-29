@@ -751,14 +751,24 @@ async function loadData() {
 
 async function saveSettings() {
   if (!uid) return;
-  await setDoc(doc(db, 'users', uid, 'data', 'settings'), { bank: S.bank, mpg: S.mpg });
+  try {
+    await setDoc(doc(db, 'users', uid, 'data', 'settings'), { bank: S.bank, mpg: S.mpg });
+  } catch (e) {
+    console.error('saveSettings failed:', e);
+    toast('⚠️ Save failed — check Firestore rules');
+  }
 }
 
 async function saveMonthData() {
   if (!uid) return;
-  await setDoc(doc(db, 'users', uid, 'months', month()), {
-    shifts: S.shifts, paychecks: S.paychecks, gasFillups: S.gasFillups,
-  });
+  try {
+    await setDoc(doc(db, 'users', uid, 'months', month()), {
+      shifts: S.shifts, paychecks: S.paychecks, gasFillups: S.gasFillups,
+    });
+  } catch (e) {
+    console.error('saveMonthData failed:', e);
+    toast('⚠️ Save failed — check Firestore rules');
+  }
 }
 
 // ── Auth ─────────────────────────────────────────────────────

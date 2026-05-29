@@ -98,7 +98,7 @@
     .header h1 { font-size: 28px; font-weight: 800; }
     .header p { color: var(--muted); font-size: 14px; margin-top: 6px; }
 
-    /* ── Bank bar ── */
+    /* ── Bank bar (read-only now) ── */
     .bank-bar {
       background: var(--surface); border-radius: var(--r);
       padding: 16px 20px; display: flex; align-items: center;
@@ -113,22 +113,14 @@
     }
     .lbl { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 2px; }
     .bank-val { font-size: 22px; font-weight: 800; }
-    .bank-edit { display: flex; align-items: center; gap: 8px; }
-    .inp-wrap { position: relative; }
-    .pfx-icon {
-      position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
-      font-size: 13px; font-weight: 600; color: var(--muted); pointer-events: none;
+    .auto-badge {
+      font-size: 11px;
+      background: var(--primary-light);
+      padding: 4px 10px;
+      border-radius: 100px;
+      color: var(--primary);
+      font-weight: 600;
     }
-    .bank-inp {
-      width: 130px; padding: 8px 10px 8px 22px;
-      font-family: inherit; font-size: 15px; font-weight: 700; color: var(--text);
-      background: var(--bg); border: 2px solid var(--border); border-radius: 10px;
-      outline: none; transition: border-color .15s;
-      -moz-appearance: textfield;
-    }
-    .bank-inp::-webkit-inner-spin-button,
-    .bank-inp::-webkit-outer-spin-button { -webkit-appearance: none; }
-    .bank-inp:focus { border-color: var(--primary); }
 
     /* ── Buttons ── */
     .btn {
@@ -180,10 +172,11 @@
 
     /* ── Jars ── */
     .jars-row {
-      display: grid; grid-template-columns: 1fr 1fr;
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
       gap: 16px; margin-bottom: 20px;
     }
-    @media (max-width: 520px) { .jars-row { grid-template-columns: 1fr; } }
+    @media (max-width: 680px) { .jars-row { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 400px) { .jars-row { grid-template-columns: 1fr; } }
 
     .jar-card {
       background: var(--surface); border-radius: var(--r);
@@ -209,14 +202,11 @@
       background: rgba(255,255,255,.28); border-radius: 50%;
       pointer-events: none; z-index: 3;
     }
-    /* Bills jar — Bee themed */
-    /* Bills jar — gold coins scattered (whimsical) */
     .jar-exp .jar-lid  { background: var(--bee-yellow); }
     .jar-exp .jar-neck { border-color: var(--bee-dark); }
     .jar-exp .jar-body { border-color: var(--bee-dark); border-width: 4px; }
     .jar-exp .jar-fill { background: linear-gradient(to top, #B87800, #FFD93D 55%, #FFF4A0); }
     .jar-exp .wave { display: none; }
-    /* Free money jar — dollar bills scattered (PuppyCat) */
     .jar-free .jar-lid  { background: var(--puppy-pink); }
     .jar-free .jar-neck { border-color: var(--puppy-purple); }
     .jar-free .jar-body { border-color: var(--puppy-purple); border-width: 4px; }
@@ -224,9 +214,33 @@
     .jar-free .wave { display: none; }
     .jar-exp  .jar-pill { background: #FFF4A0; color: #3D2000; }
     .jar-free .jar-pill { background: var(--primary-light); color: var(--puppy-purple); }
+    .jar-save .jar-lid  { background: var(--puppy-blue); }
+    .jar-save .jar-neck { border-color: #3D7A9A; }
+    .jar-save .jar-body { border-color: #3D7A9A; border-width: 4px; }
+    .jar-save .jar-fill { background: linear-gradient(to top, #1E5A7A, #71a1c5 55%, #C8E6F5); }
+    .jar-save .wave     { display: none; }
+    .jar-save .jar-pill { background: #D6EEF8; color: #1E5A7A; }
+    .savings-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px;
+    }
+    .savings-item:last-child { border-bottom: none; }
+    .savings-item-name { font-weight: 600; color: var(--text); }
+    .savings-item-right { display: flex; align-items: center; gap: 10px; }
+    .savings-item-amt { font-weight: 800; color: #1E5A7A; }
+    .savings-del { background: none; border: none; cursor: pointer; font-size: 15px; color: var(--muted); padding: 0 2px; line-height: 1; }
+    .savings-del:hover { color: #EF4444; }
     .jar-decor {
       position: absolute; pointer-events: none; user-select: none;
       opacity: 0.90; z-index: 2; line-height: 1;
+    }
+    .jar-gold-coin {
+      width: 18px; height: 18px; border-radius: 50%;
+      background: radial-gradient(circle at 38% 35%, #FFFDE0, #FFE94D 40%, #FFD700 70%, #E8B800);
+      border: 2px solid #FFE87A;
+      box-shadow: inset -1px -1px 2px rgba(0,0,0,.1), inset 1px 1px 3px rgba(255,255,255,.7);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 900; color: #FFE060;
     }
     .btn-blue-full {
       background: linear-gradient(135deg, #71a1c5, #9bc5e0); color: #fff;
@@ -296,7 +310,6 @@
       display: inline-block; font-size: 11px; font-weight: 700;
       padding: 3px 10px; border-radius: 100px; margin-top: 6px;
     }
-    /* pills defined with jar theme above */
 
     /* ── Card ── */
     .card {
@@ -324,9 +337,19 @@
     .bill-row {
       display: flex; align-items: center; justify-content: space-between;
       padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px;
+      cursor: pointer; transition: opacity .15s;
     }
     .bill-row:last-child { border-bottom: none; }
+    .bill-row.paid { opacity: 0.45; }
+    .bill-row.paid .bill-name { text-decoration: line-through; }
     .bill-left { display: flex; align-items: center; gap: 9px; font-weight: 600; color: var(--muted); }
+    .bill-check {
+      width: 18px; height: 18px; border-radius: 5px; flex-shrink: 0;
+      border: 2px solid var(--border); background: var(--surface);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; transition: all .15s;
+    }
+    .bill-row.paid .bill-check { background: var(--green); border-color: var(--green); color: #fff; }
     .bill-amt { font-weight: 700; }
     .bill-dyn { color: var(--primary); font-size: 12px; font-weight: 700; }
     .bills-total {
@@ -366,10 +389,10 @@
       position: absolute; top: 50%; transform: translateY(-50%);
       font-size: 13px; font-weight: 600; color: var(--muted); pointer-events: none;
     }
-    .pfx { left: 12px; }
-    .sfx { right: 12px; }
+    .pfx { left: 14px; }
+    .sfx { right: 14px; }
     input[type="number"], input[type="text"] {
-      width: 100%; padding: 11px 12px;
+      width: 100%; padding: 11px 14px 11px 25px;
       font-family: inherit; font-size: 15px; font-weight: 700; color: var(--text);
       background: #F9F9FB; border: 2px solid var(--border); border-radius: 12px;
       outline: none; transition: border-color .15s, background .15s;
@@ -378,8 +401,8 @@
     input[type="number"]::-webkit-inner-spin-button,
     input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
     input:focus { border-color: var(--primary); background: var(--primary-light); }
-    .pp { padding-left: 26px; }
-    .sp { padding-right: 44px; }
+    .pp { padding-left: 30px; }
+    .sp { padding-right: 48px; }
 
     /* ── Shift preview ── */
     .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
@@ -460,22 +483,16 @@
     <p>Fill the bills jar before the free money jar can grow.</p>
   </div>
 
-  <!-- Bank balance -->
+  <!-- Bank balance (auto-calculated, read-only) -->
   <div class="bank-bar">
     <div class="bank-left">
       <div class="bank-icon">🏦</div>
       <div>
-        <div class="lbl">Bank balance</div>
+        <div class="lbl">Available to spend</div>
         <div class="bank-val" id="bank-display">$0.00</div>
       </div>
     </div>
-    <div class="bank-edit">
-      <div class="inp-wrap">
-        <span class="pfx-icon">$</span>
-        <input type="number" class="bank-inp" id="bank-inp" placeholder="0.00" min="0" step="0.01">
-      </div>
-      <button class="btn btn-purple-sm" id="btn-bank">Update</button>
-    </div>
+    <div class="auto-badge">✨ Auto-calculated from income</div>
   </div>
 
   <!-- Two jars -->
@@ -491,7 +508,8 @@
       <div class="jar-info">
         <div class="jar-name">🧾 Bills Jar</div>
         <div class="jar-amt" id="j1-amt">$0</div>
-        <div class="jar-sub" id="j1-sub">of $0 covered</div>
+        <div class="jar-sub" id="j1-sub">of $644 + $450</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">🏠 <span id="j1-rent">$0</span> / $450 rent</div>
         <span class="jar-pill" id="j1-pill">0%</span>
       </div>
     </div>
@@ -510,6 +528,21 @@
         <span class="jar-pill" id="j2-pill" style="display:none">0%</span>
       </div>
     </div>
+    <div class="jar-card jar-save" id="jar-save-card" style="display:none">
+      <div class="jar-visual">
+        <div class="jar-lid"></div>
+        <div class="jar-neck"></div>
+        <div class="jar-body">
+          <div class="jar-fill" id="j3-fill"><div class="wave"></div></div>
+        </div>
+      </div>
+      <div class="jar-info">
+        <div class="jar-name">🐷 Savings</div>
+        <div class="jar-amt" id="j3-amt">$0</div>
+        <div class="jar-sub">saved so far</div>
+        <span class="jar-pill" id="j3-pill" style="display:none">0%</span>
+      </div>
+    </div>
   </div>
 
   <!-- Bills breakdown -->
@@ -519,6 +552,25 @@
       <span>▾</span>
     </div>
     <div class="bills-inner" id="bills-inner"></div>
+    <!-- Custom expenses -->
+    <div style="padding:0 20px 16px; border-top:1px solid var(--border)">
+      <div class="sec-title" style="margin:12px 0 10px"><div class="dot dot-o"></div>One-Time Expenses</div>
+      <div id="custom-exp-list"></div>
+      <div class="two-col" style="margin-top:10px">
+        <div class="ig" style="margin-bottom:0">
+          <div class="il">Name</div>
+          <input type="text" id="ce-name" placeholder="Gym, therapy…">
+        </div>
+        <div class="ig" style="margin-bottom:0">
+          <div class="il">Amount</div>
+          <div class="iw">
+            <span class="pfx">$</span>
+            <input type="number" id="ce-amt" placeholder="0.00" min="0" step="0.01" class="pp">
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-ghost-sm" id="btn-add-exp" style="width:100%;padding:9px;margin-top:10px">+ Add Expense</button>
+    </div>
   </div>
 
   <!-- Gas fill-up tracker -->
@@ -605,10 +657,6 @@
   <div class="card">
     <div class="sec-title"><div class="dot"></div>Income This Month</div>
     <div class="income-row">
-      <span class="income-lbl">🏦 Bank balance</span>
-      <span class="income-val" id="inc-bank">$0.00</span>
-    </div>
-    <div class="income-row">
       <span class="income-lbl" style="display:flex;align-items:center;gap:7px">
         📅 Prior income
         <button class="btn btn-ghost-sm" id="btn-edit-opening" style="font-size:10px;padding:3px 8px;line-height:1.3">edit</button>
@@ -631,8 +679,34 @@
       <span class="income-val" id="inc-pay">$0.00</span>
     </div>
     <div class="income-total">
-      <span>Total in</span>
+      <span>Total earned this month</span>
       <span id="inc-total">$0.00</span>
+    </div>
+  </div>
+
+  <!-- Savings -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="sec-title"><div class="dot" style="background:var(--puppy-blue)"></div>Savings Goals</div>
+    <!-- Create a new goal -->
+    <div class="two-col">
+      <div class="ig" style="margin-bottom:0">
+        <div class="il">What are you saving for?</div>
+        <input type="text" id="sv-name" placeholder="Vacation, emergency fund…">
+      </div>
+      <div class="ig" style="margin-bottom:0">
+        <div class="il">Goal amount</div>
+        <div class="iw">
+          <span class="pfx">$</span>
+          <input type="number" id="sv-target" placeholder="0.00" min="0" step="0.01" class="pp">
+        </div>
+      </div>
+    </div>
+    <button class="btn-full btn-blue-full" id="btn-add-goal">🐷 Create Goal →</button>
+    <!-- Goals list -->
+    <div id="savings-list" style="margin-top:14px"><div class="log-empty">No goals yet</div></div>
+    <div id="savings-total-row" style="display:none; justify-content:space-between; align-items:center; padding:10px 0 0; margin-top:4px; border-top:2px solid var(--border); font-weight:800; font-size:15px;">
+      <span>Total saved</span>
+      <span id="savings-total">$0.00</span>
     </div>
   </div>
 
@@ -775,7 +849,7 @@ const FIXED = 644;
 
 // ── App state ────────────────────────────────────────────────
 let uid     = null;
-let S       = { bank: 0, openingBalance: 0, mpg: 0, odo: 0, tankPct: 0, shifts: [], paychecks: [], gasFillups: [], personalTrips: [] };
+let S       = { openingBalance: 0, mpg: 0, odo: 0, tankPct: 0, customExpenses: [], shifts: [], paychecks: [], gasFillups: [], personalTrips: [], savingsItems: [], paidBills: [] };
 let preview = null;
 
 function month() {
@@ -787,17 +861,46 @@ function month() {
 const rentPaid   = () => S.shifts.reduce((a, s) => a + s.rentShare, 0);
 const gigIncome  = () => S.shifts.reduce((a, s) => a + s.takeHome,  0);
 const payIncome  = () => S.paychecks.reduce((a, p) => a + p.amount, 0);
-const totalIn    = () => S.bank + S.openingBalance + gigIncome() + payIncome();
-const jar1Target = () => FIXED + Math.min(rentPaid(), RENT_CAP);
-const jar1Amt    = () => Math.min(totalIn(), jar1Target());
-const jar2Amt    = () => Math.max(0, totalIn() - jar1Target());
+const totalIn    = () => S.openingBalance + gigIncome() + payIncome();
+const jar1Target    = () => FIXED + RENT_CAP;
+const totalExpenses = () =>
+  S.gasFillups.reduce((a, g) => a + g.total, 0) +
+  S.customExpenses.reduce((a, e) => a + e.amount, 0);
+
+function jarAmounts() {
+  const t1        = jar1Target();
+  const tot       = totalIn();
+  const savTarget = S.savingsItems.reduce((a, i) => a + (i.target || 0), 0);
+  const expenses  = totalExpenses();
+
+  // Fill order: bills → savings → free money
+  const grossBills = Math.min(tot, t1);
+  const afterBills = Math.max(0, tot - t1);
+  const grossSav   = Math.min(afterBills, savTarget);
+  const grossFree  = Math.max(0, afterBills - savTarget);
+
+  // Expense cascade (reverse): free money → savings → bills
+  let dispFree  = grossFree - expenses;
+  let dispSav   = grossSav;
+  let dispBills = grossBills;
+
+  if (dispFree < 0) {
+    dispSav = Math.max(0, grossSav + dispFree);
+    const savOverflow = grossSav + dispFree;
+    dispFree = 0;
+    if (savOverflow < 0) {
+      dispBills = Math.max(0, grossBills + savOverflow);
+    }
+  }
+
+  return { a1: dispBills, a2: dispFree, a3: dispSav, t1, savTarget };
+}
 
 // ── Firestore ────────────────────────────────────────────────
 async function loadData() {
   const settSnap = await getDoc(doc(db, 'users', uid, 'data', 'settings'));
   if (settSnap.exists()) {
     const d = settSnap.data();
-    S.bank           = d.bank           || 0;
     S.openingBalance = d.openingBalance || 0;
     S.mpg            = d.mpg            || 0;
     S.odo            = d.odo            || 0;
@@ -808,10 +911,13 @@ async function loadData() {
     const d = mSnap.data();
     S.shifts        = d.shifts        || [];
     S.paychecks     = d.paychecks     || [];
-    S.gasFillups    = d.gasFillups    || [];
-    S.personalTrips = d.personalTrips || [];
+    S.gasFillups      = d.gasFillups      || [];
+    S.personalTrips   = d.personalTrips   || [];
+    S.savingsItems    = d.savingsItems    || [];
+    S.customExpenses  = d.customExpenses  || [];
+    S.paidBills       = d.paidBills       || [];
   } else {
-    S.shifts = []; S.paychecks = []; S.gasFillups = []; S.personalTrips = [];
+    S.shifts = []; S.paychecks = []; S.gasFillups = []; S.personalTrips = []; S.savingsItems = []; S.customExpenses = []; S.paidBills = [];
   }
 }
 
@@ -819,7 +925,7 @@ async function saveSettings() {
   if (!uid) return;
   try {
     await setDoc(doc(db, 'users', uid, 'data', 'settings'), {
-    bank: S.bank, openingBalance: S.openingBalance,
+    openingBalance: S.openingBalance,
     mpg: S.mpg, odo: S.odo, tankPct: S.tankPct,
   });
   } catch (e) {
@@ -832,7 +938,7 @@ async function saveMonthData() {
   if (!uid) return;
   try {
     await setDoc(doc(db, 'users', uid, 'months', month()), {
-      shifts: S.shifts, paychecks: S.paychecks, gasFillups: S.gasFillups, personalTrips: S.personalTrips,
+      shifts: S.shifts, paychecks: S.paychecks, gasFillups: S.gasFillups, personalTrips: S.personalTrips, savingsItems: S.savingsItems, customExpenses: S.customExpenses, paidBills: S.paidBills,
     });
   } catch (e) {
     console.error('saveMonthData failed:', e);
@@ -850,14 +956,11 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById('app').style.display          = 'block';
     await loadData();
     if (S.mpg)  document.getElementById('s-mpg').value   = S.mpg;
-    if (S.bank) {
-      document.getElementById('bank-inp').value           = S.bank;
-      document.getElementById('bank-display').textContent = fmt(S.bank);
-    }
     if (S.openingBalance) document.getElementById('opening-inp').value = S.openingBalance;
     if (S.odo)     document.getElementById('g-odo').value   = S.odo;
     if (S.tankPct) document.getElementById('g-tank').value  = S.tankPct;
     populateJarDecor();
+    renderCustomExp();
     renderBills();
     refreshAll(false);
   } else {
@@ -868,15 +971,6 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // ── Actions ──────────────────────────────────────────────────
-function saveBank() {
-  S.bank = +(document.getElementById('bank-inp').value) || 0;
-  document.getElementById('bank-display').textContent = fmt(S.bank);
-  saveSettings();
-  refreshJars();
-  refreshIncome();
-  toast('🏦 Balance updated');
-}
-
 function onMpg() {
   const v = +(document.getElementById('s-mpg').value);
   if (v > 0) { S.mpg = v; saveSettings(); }
@@ -893,7 +987,7 @@ function calcShift() {
   if (!earn && !mi) { document.getElementById('shift-preview').style.display = 'none'; preview = null; return; }
 
   const gasCost = mpg > 0 ? (mi / mpg) * gas : 0;
-  const rRaw    = earn * 0.30;
+  const rRaw    = earn / 3;
   const rPaid   = rentPaid();
   let rentShare, capped;
   if (rPaid + rRaw > RENT_CAP) {
@@ -927,7 +1021,7 @@ function logShift() {
   document.getElementById('shift-preview').style.display = 'none';
   preview = null;
   refreshAll();
-  toast(`✅ Shift logged — ${fmt(S.shifts.at(-1).takeHome)} going into jars`);
+  toast(`✅ Shift logged — ${fmt(S.shifts.at(-1).takeHome)} added to income`);
 }
 
 function addPaycheck() {
@@ -943,7 +1037,7 @@ function addPaycheck() {
   document.getElementById('pc-amt').value = '';
   document.getElementById('pc-lbl').value = '';
   refreshAll();
-  toast(`💼 ${fmt(amt)} added from ${lbl}`);
+  toast(`💼 ${fmt(amt)} added from ${lbl} → added to available money`);
 }
 
 function calcGas() {
@@ -1043,16 +1137,23 @@ function renderPersonalLog() {
 
 function populateJarDecor() {
   const configs = [
-    { id: 'j1-fill', items: ['🪙','🪙','💰','⭐','🪙','✨','🪙','💫'] },
+    { id: 'j1-fill', items: ['coin','coin','⭐','coin','⭐','coin','⭐','coin'] },
     { id: 'j2-fill', items: ['💵','💵','💜','✨','💵','🌟','💵','⭐'] },
+    { id: 'j3-fill', items: ['🐷','💰','💙','🐷','💰','💙','🐷','💰'] },
   ];
   configs.forEach(({ id, items }) => {
     const fill = document.getElementById(id);
     fill.querySelectorAll('.jar-decor').forEach(e => e.remove());
     for (let i = 0; i < 18; i++) {
-      const el = document.createElement('span');
-      el.className = 'jar-decor';
-      el.textContent = items[i % items.length];
+      const item = items[i % items.length];
+      const el   = item === 'coin' ? document.createElement('div') : document.createElement('span');
+      if (item === 'coin') {
+        el.className = 'jar-decor jar-gold-coin';
+        el.textContent = '$';
+      } else {
+        el.className = 'jar-decor';
+        el.textContent = item;
+      }
       el.style.fontSize  = (10 + Math.random() * 14) + 'px';
       el.style.left      = (2 + Math.random() * 88) + '%';
       el.style.bottom    = (1 + Math.random() * 94) + '%';
@@ -1068,22 +1169,27 @@ function toggleBills() {
 }
 
 // ── Rendering ────────────────────────────────────────────────
-function refreshAll(animate = true) { refreshJars(animate); refreshIncome(); renderLogs(); renderGasLog(); renderPersonalLog(); }
+function refreshAll(animate = true) { refreshJars(animate); refreshIncome(); renderLogs(); renderGasLog(); renderPersonalLog(); renderSavings(); }
 
-const _prevPct = { j1: 0, j2: 0 };
+const savingsTotal = () => S.savingsItems.reduce((a, i) => a + (i.funded || 0), 0);
+
+const _prevPct = { j1: 0, j2: 0, j3: 0 };
 
 function refreshJars(animate = true) {
-  const t1 = jar1Target(), a1 = jar1Amt(), a2 = jar2Amt();
-  const p1 = t1 > 0 ? Math.min(100, (a1 / t1) * 100) : 0;
-  const p2 = t1 > 0 ? Math.min(100, (a2 / t1) * 100) : 0;
+  const { a1, a2, a3, t1, savTarget } = jarAmounts();
+  const p1 = t1 > 0         ? Math.min(100, (a1 / t1)        * 100) : 0;
+  const p2 = t1 > 0         ? Math.min(100, (a2 / t1)        * 100) : 0;
+  const p3 = savTarget > 0  ? Math.min(100, (a3 / savTarget)  * 100) : 0;
 
   const jar1El = document.querySelector('.jar-exp');
   const jar2El = document.querySelector('.jar-free');
-  const prev1 = _prevPct.j1, prev2 = _prevPct.j2;
+  const jar3El = document.querySelector('.jar-save');
+  const prev1 = _prevPct.j1, prev2 = _prevPct.j2, prev3 = _prevPct.j3;
 
   setFill('j1-fill', p1);
   set('j1-amt',  fmt(a1));
-  set('j1-sub',  `of ${fmt(t1)} covered`);
+  set('j1-sub',  `of ${fmt(FIXED)} + ${fmt(RENT_CAP)}`);
+  set('j1-rent', fmt(Math.min(rentPaid(), RENT_CAP)));
   set('j1-pill', `${Math.round(p1)}% covered`);
 
   setFill('j2-fill', p2);
@@ -1096,7 +1202,20 @@ function refreshJars(animate = true) {
     pill2.style.display = 'none';
   }
 
-  if (!animate) { _prevPct.j1 = p1; _prevPct.j2 = p2; return; }
+  setFill('j3-fill', p3);
+  set('j3-amt', fmt(a3));
+  const pill3 = document.getElementById('j3-pill');
+  if (a3 > 0) {
+    pill3.style.display = 'inline-block';
+    pill3.textContent = `${Math.round(p3)}% of goal`;
+  } else {
+    pill3.style.display = 'none';
+  }
+
+  // Update the bank display (auto-calculated)
+  document.getElementById('bank-display').textContent = fmt(totalIn() - a1 - a3);
+
+  if (!animate) { _prevPct.j1 = p1; _prevPct.j2 = p2; _prevPct.j3 = p3; return; }
 
   if (p1 > prev1) {
     bounceJar(jar1El);
@@ -1110,7 +1229,13 @@ function refreshJars(animate = true) {
     if (p1 >= 100) soundFill(); else soundCoin();
     checkMilestones(jar2El, prev2, p2, 'j2');
   }
-  _prevPct.j1 = p1; _prevPct.j2 = p2;
+  if (p3 > prev3) {
+    bounceJar(jar3El);
+    spawnCoins(jar3El, Math.ceil((p3 - prev3) / 10) + 1);
+    soundCoin();
+    checkMilestones(jar3El, prev3, p3, 'j3');
+  }
+  _prevPct.j1 = p1; _prevPct.j2 = p2; _prevPct.j3 = p3;
 }
 
 function checkMilestones(jarEl, prev, curr, key) {
@@ -1135,30 +1260,64 @@ function setFill(id, pct) {
 }
 
 function refreshIncome() {
-  set('inc-bank',    fmt(S.bank));
   set('inc-opening', fmt(S.openingBalance));
   set('inc-gig',     fmt(gigIncome()));
   set('inc-pay',     fmt(payIncome()));
   set('inc-total',   fmt(totalIn()));
 }
 
+function toggleBillPaid(name) {
+  const bill = BILLS.find(b => b.name === name);
+  const amt  = bill?.dynamic ? Math.min(rentPaid(), RENT_CAP) : (bill?.amount || 0);
+
+  if (S.paidBills.includes(name)) {
+    S.paidBills = S.paidBills.filter(n => n !== name);
+    S.bank = +(S.bank + amt).toFixed(2);
+  } else {
+    S.paidBills.push(name);
+    S.bank = +Math.max(0, S.bank - amt).toFixed(2);
+    soundCoin();
+  }
+
+  document.getElementById('bank-inp').value           = S.bank;
+  document.getElementById('bank-display').textContent = fmt(S.bank);
+  saveMonthData();
+  saveSettings();
+  refreshJars();
+  refreshIncome();
+  renderBills();
+}
+
 function renderBills() {
   const rp = rentPaid();
   const rows = BILLS.map(b => {
+    const paid = S.paidBills.includes(b.name);
     if (b.dynamic) {
-      return `<div class="bill-row">
-        <div class="bill-left"><span>${b.emoji}</span><span>${b.name}</span></div>
+      return `<div class="bill-row ${paid ? 'paid' : ''}" onclick="toggleBillPaid('${b.name}')">
+        <div class="bill-left">
+          <div class="bill-check">${paid ? '✓' : ''}</div>
+          <span>${b.emoji}</span><span class="bill-name">${b.name}</span>
+        </div>
         <span class="bill-amt"><span class="bill-dyn">${fmt(Math.min(rp, RENT_CAP))}</span> / ${fmt(RENT_CAP)} cap</span>
       </div>`;
     }
-    return `<div class="bill-row">
-      <div class="bill-left"><span>${b.emoji}</span><span>${b.name}</span></div>
+    return `<div class="bill-row ${paid ? 'paid' : ''}" onclick="toggleBillPaid('${b.name}')">
+      <div class="bill-left">
+        <div class="bill-check">${paid ? '✓' : ''}</div>
+        <span>${b.emoji}</span><span class="bill-name">${b.name}</span>
+      </div>
       <span class="bill-amt">${fmt(b.amount)}</span>
     </div>`;
   }).join('');
+  const paidCount = S.paidBills.length;
   document.getElementById('bills-inner').innerHTML = `${rows}
-    <div class="bills-total"><span>Monthly total</span><span>${fmt(jar1Target())}</span></div>`;
+    <div class="bills-total">
+      <span>Monthly total <span style="font-size:11px;color:var(--muted);font-weight:600">${paidCount}/${BILLS.length} paid</span></span>
+      <span>${fmt(jar1Target())}</span>
+    </div>`;
 }
+
+window.toggleBillPaid = toggleBillPaid;
 
 function renderLogs() {
   const sl = document.getElementById('shift-log');
@@ -1229,7 +1388,7 @@ function soundMilestone() {
 function spawnCoins(jarEl, count = 3) {
   const body = jarEl.querySelector('.jar-body');
   const isFree = jarEl.classList.contains('jar-free');
-  const symbols = isFree ? ['💵','💵','✨','💜'] : ['🪙','🪙','⭐','🪙'];
+  const symbols = isFree ? ['💵','💵','✨','💜'] : ['🟡','🟡','⭐','🟡'];
   for (let i = 0; i < count; i++) {
     const el = document.createElement('span');
     el.className = 'coin-particle';
@@ -1274,10 +1433,115 @@ function bounceJar(jarEl) {
   jarEl.addEventListener('animationend', () => jarEl.classList.remove('jar-bounce'), { once: true });
 }
 
+// ── Savings ──────────────────────────────────────────────────
+function addSavingsGoal() {
+  const name   = document.getElementById('sv-name').value.trim();
+  const target = +(document.getElementById('sv-target').value) || 0;
+  if (!name)      { toast('⚠️ Enter a goal name'); return; }
+  if (target <= 0) { toast('⚠️ Enter a target amount'); return; }
+  const isFirst = S.savingsItems.length === 0;
+  S.savingsItems.push({ id: Date.now(), name, target, funded: 0 });
+  saveMonthData();
+  document.getElementById('sv-name').value   = '';
+  document.getElementById('sv-target').value = '';
+  renderSavings();
+  if (isFirst) populateJarDecor();
+  refreshJars();
+  toast(`🐷 Goal "${name}" created — ${fmt(target)} target`);
+}
+
+function fundSavingsGoal(id) {
+  const item = S.savingsItems.find(i => i.id === id);
+  if (!item) return;
+  const remaining = item.target - item.funded;
+  const input = prompt(`How much are you adding to "${item.name}"?\nRemaining: ${fmt(remaining)}`);
+  const amt = +(input) || 0;
+  if (amt <= 0) return;
+  item.funded = Math.min(item.target, item.funded + amt);
+  refreshJars();
+  saveMonthData();
+  renderSavings();
+  soundCoin();
+  toast(`🐷 ${fmt(amt)} added to "${item.name}"`);
+}
+
+function deleteSavingsItem(id) {
+  S.savingsItems = S.savingsItems.filter(i => i.id !== id);
+  saveMonthData();
+  refreshJars();
+  renderSavings();
+}
+
+function renderSavings() {
+  const list     = document.getElementById('savings-list');
+  const totalRow = document.getElementById('savings-total-row');
+  const jarCard  = document.getElementById('jar-save-card');
+  if (!S.savingsItems.length) {
+    list.innerHTML = '<div class="log-empty">No goals yet</div>';
+    totalRow.style.display = 'none';
+    jarCard.style.display  = 'none';
+    return;
+  }
+  jarCard.style.display = 'flex';
+  list.innerHTML = S.savingsItems.map(i => {
+    const pct = i.target > 0 ? Math.min(100, Math.round((i.funded / i.target) * 100)) : 0;
+    return `<div class="savings-item">
+      <div>
+        <div class="savings-item-name">${i.name}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${fmt(i.funded)} of ${fmt(i.target)} — ${pct}%</div>
+      </div>
+      <div class="savings-item-right">
+        <button class="btn btn-ghost-sm" style="font-size:11px;padding:4px 10px" onclick="fundSavingsGoal(${i.id})">+ Add</button>
+        <button class="savings-del" onclick="deleteSavingsItem(${i.id})" title="Delete">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+  set('savings-total', fmt(savingsTotal()));
+  totalRow.style.display = 'flex';
+}
+
+window.deleteSavingsItem  = deleteSavingsItem;
+window.fundSavingsGoal    = fundSavingsGoal;
+window.deleteCustomExp    = deleteCustomExp;
+
+// ── Custom expenses ───────────────────────────────────────────
+function addCustomExp() {
+  const name = document.getElementById('ce-name').value.trim();
+  const amt  = +(document.getElementById('ce-amt').value) || 0;
+  if (!name)   { toast('⚠️ Enter a name'); return; }
+  if (amt <= 0) { toast('⚠️ Enter an amount'); return; }
+  S.customExpenses.push({ id: Date.now(), name, amount: amt });
+  saveMonthData();
+  document.getElementById('ce-name').value = '';
+  document.getElementById('ce-amt').value  = '';
+  renderCustomExp();
+  refreshJars();
+  toast(`💸 ${name} — ${fmt(amt)} deducted`);
+}
+
+function deleteCustomExp(id) {
+  S.customExpenses = S.customExpenses.filter(e => e.id !== id);
+  saveMonthData();
+  renderCustomExp();
+  refreshJars();
+}
+
+function renderCustomExp() {
+  const list = document.getElementById('custom-exp-list');
+  if (!S.customExpenses.length) { list.innerHTML = ''; return; }
+  list.innerHTML = S.customExpenses.map(e => `
+    <div class="savings-item">
+      <span class="savings-item-name">${e.name}</span>
+      <div class="savings-item-right">
+        <span class="savings-item-amt">${fmt(e.amount)}</span>
+        <button class="savings-del" onclick="deleteCustomExp(${e.id})">✕</button>
+      </div>
+    </div>`).join('');
+}
+
 // ── Wire up events ───────────────────────────────────────────
 document.getElementById('btn-sign-in').addEventListener('click',  () => signInWithPopup(auth, provider).catch(() => toast('⚠️ Sign in failed')));
 document.getElementById('btn-sign-out').addEventListener('click', () => signOut(auth));
-document.getElementById('btn-bank').addEventListener('click',     saveBank);
 document.getElementById('btn-log-shift').addEventListener('click', logShift);
 document.getElementById('btn-add-paycheck').addEventListener('click', addPaycheck);
 document.getElementById('bills-toggle').addEventListener('click', toggleBills);
@@ -1291,6 +1555,8 @@ document.getElementById('g-ppg').addEventListener('input',   calcGas);
 document.getElementById('btn-log-gas').addEventListener('click', logGasFillup);
 document.getElementById('btn-save-tank').addEventListener('click', saveTankOdo);
 document.getElementById('btn-log-personal').addEventListener('click', logPersonalTrip);
+document.getElementById('btn-add-goal').addEventListener('click', addSavingsGoal);
+document.getElementById('btn-add-exp').addEventListener('click', addCustomExp);
 document.getElementById('btn-edit-opening').addEventListener('click', () => {
   document.getElementById('opening-edit').classList.toggle('open');
 });

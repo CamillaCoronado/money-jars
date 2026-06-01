@@ -816,6 +816,12 @@
     </div>
   </div>
 
+  <!-- Month History -->
+  <div class="card" style="margin-top:16px">
+    <div class="sec-title"><div class="dot" style="background:#71a1c5"></div>Month History</div>
+    <div id="history-list"><div class="log-empty">Loading…</div></div>
+  </div>
+
 </div>
 </div>
 
@@ -987,6 +993,7 @@ onAuthStateChanged(auth, async (user) => {
     renderCustomExp();
     renderBills();
     refreshAll(false);
+    loadHistory();
   } else {
     uid = null;
     document.getElementById('login-screen').style.display = 'flex';
@@ -1290,6 +1297,40 @@ function checkMilestones(jarEl, prev, curr, key) {
 
 function setFill(id, pct) {
   document.getElementById(id).style.height = `${pct}%`;
+}
+
+async function loadHistory() {
+  const el = document.getElementById('history-list');
+  const months = [];
+  for (let i = 1; i <= 6; i++) {
+    const d = new Date();
+    d.setMonth(d.getMonth() - i);
+    months.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
+  }
+  const results = [];
+  for (const key of months) {
+    const snap = await getDoc(doc(db, 'users', uid, 'months', key));
+    if (snap.exists()) results.push({ key, ...snap.data() });
+  }
+  if (!results.length) { el.innerHTML = '<div class="log-empty">No previous months found</div>'; return; }
+  el.innerHTML = results.map(m => {
+    const income   = (m.paychecks || []).reduce((a, p) => a + p.amount, 0)
+                   + (m.shifts    || []).reduce((a, s) => a + s.takeHome, 0);
+    const expenses = (m.gasFillups     || []).reduce((a, g) => a + g.total,   0)
+                   + (m.customExpenses || []).reduce((a, e) => a + e.amount,   0);
+    const [yr, mo] = m.key.split('-');
+    const label = new Date(+yr, +mo - 1).toLocaleString('en-US', { month: 'long', year: 'numeric' });
+    return `<div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="font-weight:800;font-size:14px;margin-bottom:4px">${label}</div>
+      <div style="font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:10px">
+        <span>💰 Income: <b>${fmt(income)}</b></span>
+        <span>💸 Expenses: <b>${fmt(expenses)}</b></span>
+        <span>🚗 ${(m.shifts||[]).length} shifts</span>
+        <span>💼 ${(m.paychecks||[]).length} paychecks</span>
+        <span>⛽ ${(m.gasFillups||[]).length} fill-ups</span>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function refreshIncome() {

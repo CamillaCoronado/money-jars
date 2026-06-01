@@ -563,7 +563,14 @@
       <span>🧾 Monthly Bills</span>
       <span>▾</span>
     </div>
-    <div class="bills-inner" id="bills-inner"></div>
+    <div class="bills-inner" id="bills-inner">
+      <div style="display:flex;gap:6px;padding:8px 0 12px">
+        <button class="btn btn-purple-sm" id="tab-this" onclick="switchBillsTab('this')" style="font-size:12px;padding:5px 14px">This Month</button>
+        <button class="btn btn-ghost-sm" id="tab-prev" onclick="switchBillsTab('prev')" style="font-size:12px;padding:5px 14px" id="tab-prev"></button>
+      </div>
+      <div id="bills-this"></div>
+      <div id="bills-prev" style="display:none"></div>
+    </div>
     <!-- Custom expenses -->
     <div style="padding:0 20px 16px; border-top:1px solid var(--border)">
       <div class="sec-title" style="margin:12px 0 10px"><div class="dot dot-o"></div>One-Time Expenses</div>
@@ -867,7 +874,7 @@ const FIXED = 644;
 
 // ── App state ────────────────────────────────────────────────
 let uid     = null;
-let S       = { bank: 0, openingBalance: 0, mpg: 0, odo: 0, tankPct: 0, savingsItems: [], customExpenses: [], shifts: [], paychecks: [], gasFillups: [], personalTrips: [], paidBills: [] };
+let S       = { bank: 0, openingBalance: 0, mpg: 0, odo: 0, tankPct: 0, lastCarryOverMonth: '', savingsItems: [], customExpenses: [], shifts: [], paychecks: [], gasFillups: [], personalTrips: [], paidBills: [] };
 let preview = null;
 
 function month() {
@@ -929,12 +936,13 @@ async function loadData() {
   const settSnap = await getDoc(doc(db, 'users', uid, 'data', 'settings'));
   if (settSnap.exists()) {
     const d = settSnap.data();
-    S.bank           = d.bank           || 0;
-    S.openingBalance = d.openingBalance || 0;
-    S.mpg            = d.mpg            || 0;
-    S.odo            = d.odo            || 0;
-    S.tankPct        = d.tankPct        || 0;
-    S.savingsItems   = d.savingsItems   || [];
+    S.bank              = d.bank              || 0;
+    S.openingBalance    = d.openingBalance    || 0;
+    S.mpg               = d.mpg               || 0;
+    S.odo               = d.odo               || 0;
+    S.tankPct           = d.tankPct           || 0;
+    S.savingsItems      = d.savingsItems      || null; // null = not yet migrated
+    S.lastCarryOverMonth = d.lastCarryOverMonth || '';
   }
   const mSnap = await getDoc(doc(db, 'users', uid, 'months', month()));
   if (mSnap.exists()) {
@@ -946,30 +954,43 @@ async function loadData() {
     S.customExpenses  = d.customExpenses  || [];
     S.paidBills       = d.paidBills       || [];
   } else {
-    // New month — carry over ending balance from previous month
     S.shifts = []; S.paychecks = []; S.gasFillups = []; S.personalTrips = []; S.customExpenses = []; S.paidBills = [];
+  }
 
+  // Migrate savingsItems from month data to settings if not yet there
+  if (S.savingsItems === null) {
+    // Try current month first, then previous month
+    const sources = [month(), prevMonth()];
+    S.savingsItems = [];
+    for (const key of sources) {
+      const snap = await getDoc(doc(db, 'users', uid, 'months', key));
+      if (snap.exists() && snap.data().savingsItems?.length) {
+        S.savingsItems = snap.data().savingsItems;
+        break;
+      }
+    }
+    await saveSettings();
+  }
+
+  // Carry over from previous month — runs once per month even if current month doc exists
+  if (S.lastCarryOverMonth !== month()) {
     const prevSnap = await getDoc(doc(db, 'users', uid, 'months', prevMonth()));
     if (prevSnap.exists()) {
       const p = prevSnap.data();
-      const prevIncome   = (p.paychecks     || []).reduce((a, x) => a + x.amount,   0)
-                         + (p.shifts        || []).reduce((a, x) => a + x.takeHome,  0);
-      const prevExpenses = (p.gasFillups     || []).reduce((a, x) => a + x.total,    0)
-                         + (p.customExpenses || []).reduce((a, x) => a + x.amount,   0);
-      const billsPaid    = (p.paidBills     || []).reduce((a, name) => {
-        const b = [
-          { name: 'Rent', amount: Math.min((p.shifts||[]).reduce((s,x)=>s+x.rentShare,0) + (p.paychecks||[]).reduce((s,x)=>s+x.amount/3,0), 450) },
-          { name: 'Insurance', amount: 100 }, { name: 'Storage', amount: 100 },
-          { name: 'Phone', amount: 25 }, { name: 'Claude', amount: 20 },
-          { name: 'Netflix', amount: 10 }, { name: 'Disney/Hulu', amount: 6 },
-          { name: 'Spotify', amount: 12 }, { name: 'Gas', amount: 161 },
-          { name: 'Weed', amount: 60 }, { name: 'Pet food', amount: 100 }, { name: 'Buffer', amount: 50 },
-        ].find(x => x.name === name);
-        return a + (b?.amount || 0);
-      }, 0);
+      const prevIncome   = (p.paychecks     || []).reduce((a, x) => a + x.amount,  0)
+                         + (p.shifts        || []).reduce((a, x) => a + x.takeHome, 0);
+      const prevExpenses = (p.gasFillups     || []).reduce((a, x) => a + x.total,   0)
+                         + (p.customExpenses || []).reduce((a, x) => a + x.amount,  0);
+      const BILL_AMOUNTS = { Insurance:100, Storage:100, Phone:25, Claude:20, Netflix:10,
+        'Disney/Hulu':6, Spotify:12, Gas:161, Weed:60, 'Pet food':100, Buffer:50 };
+      const rentAmt = Math.min(
+        (p.shifts||[]).reduce((s,x)=>s+x.rentShare,0) + (p.paychecks||[]).reduce((s,x)=>s+x.amount/3,0), 450);
+      const billsPaid = (p.paidBills || []).reduce((a, name) =>
+        a + (name === 'Rent' ? rentAmt : (BILL_AMOUNTS[name] || 0)), 0);
 
       const carryOver = prevIncome - prevExpenses - billsPaid;
       S.bank = Math.max(0, +(S.bank + carryOver).toFixed(2));
+      S.lastCarryOverMonth = month();
       await saveSettings();
       toast(`🔄 Carried over ${fmt(Math.max(0, carryOver))} from last month`);
     }
@@ -982,7 +1003,7 @@ async function saveSettings() {
     await setDoc(doc(db, 'users', uid, 'data', 'settings'), {
     bank: S.bank, openingBalance: S.openingBalance,
     mpg: S.mpg, odo: S.odo, tankPct: S.tankPct,
-    savingsItems: S.savingsItems,
+    savingsItems: S.savingsItems, lastCarryOverMonth: S.lastCarryOverMonth,
   });
   } catch (e) {
     console.error('saveSettings failed:', e);
@@ -1025,6 +1046,7 @@ onAuthStateChanged(auth, async (user) => {
     renderCustomExp();
     renderBills();
     refreshAll(false);
+    loadPrevMonthBills();
     loadHistory();
   } else {
     uid = null;
@@ -1160,6 +1182,58 @@ function saveBank() {
   refreshIncome();
   toast('🏦 Balance updated');
 }
+
+// ── Previous month bills ──────────────────────────────────────
+let _prevMonthData = null;
+
+async function loadPrevMonthBills() {
+  const key  = prevMonth();
+  const snap = await getDoc(doc(db, 'users', uid, 'months', key));
+  _prevMonthData = snap.exists() ? snap.data() : null;
+  const [yr, mo] = key.split('-');
+  const label = new Date(+yr, +mo - 1).toLocaleString('en-US', { month: 'long' });
+  document.getElementById('tab-prev').textContent = label;
+  renderPrevBills();
+}
+
+function renderPrevBills() {
+  const el = document.getElementById('bills-prev');
+  if (!_prevMonthData) { el.innerHTML = '<div class="log-empty" style="padding:12px 0">No data for last month</div>'; return; }
+  const paid = _prevMonthData.paidBills || [];
+  const rp   = (_prevMonthData.shifts||[]).reduce((a,s)=>a+s.rentShare,0)
+             + (_prevMonthData.paychecks||[]).reduce((a,p)=>a+p.amount/3,0);
+  el.innerHTML = BILLS.map(b => {
+    const isPaid = paid.includes(b.name);
+    const amt    = b.dynamic ? Math.min(rp, RENT_CAP) : b.amount;
+    return `<div class="bill-row ${isPaid ? 'paid' : ''}" onclick="togglePrevBillPaid('${b.name}',${amt})">
+      <div class="bill-left">
+        <div class="bill-check">${isPaid ? '✓' : ''}</div>
+        <span>${b.emoji}</span><span class="bill-name">${b.name}</span>
+      </div>
+      <span class="bill-amt">${fmt(amt)}</span>
+    </div>`;
+  }).join('');
+}
+
+async function togglePrevBillPaid(name, amt) {
+  if (!_prevMonthData) return;
+  const paid = _prevMonthData.paidBills || [];
+  if (paid.includes(name)) {
+    _prevMonthData.paidBills = paid.filter(n => n !== name);
+    S.bank = +(S.bank + amt).toFixed(2);
+  } else {
+    _prevMonthData.paidBills = [...paid, name];
+    S.bank = +Math.max(0, S.bank - amt).toFixed(2);
+    soundCoin();
+  }
+  document.getElementById('bank-inp').value           = S.bank;
+  document.getElementById('bank-display').textContent = fmt(S.bank);
+  await setDoc(doc(db, 'users', uid, 'months', prevMonth()), _prevMonthData);
+  saveSettings();
+  renderPrevBills();
+  toast(`${name} ${_prevMonthData.paidBills.includes(name) ? 'marked paid ✓' : 'unmarked'}`);
+}
+window.togglePrevBillPaid = togglePrevBillPaid;
 
 function saveOpening() {
   S.openingBalance = +(document.getElementById('opening-inp').value) || 0;
@@ -1394,6 +1468,17 @@ function toggleBillPaid(name) {
   renderBills();
 }
 
+let _billsTab = 'this';
+
+function switchBillsTab(tab) {
+  _billsTab = tab;
+  document.getElementById('bills-this').style.display = tab === 'this' ? 'block' : 'none';
+  document.getElementById('bills-prev').style.display = tab === 'prev' ? 'block' : 'none';
+  document.getElementById('tab-this').className = tab === 'this' ? 'btn btn-purple-sm' : 'btn btn-ghost-sm';
+  document.getElementById('tab-prev').className = tab === 'prev' ? 'btn btn-purple-sm' : 'btn btn-ghost-sm';
+}
+window.switchBillsTab = switchBillsTab;
+
 function renderBills() {
   const rp = rentPaid();
   const rows = BILLS.map(b => {
@@ -1416,7 +1501,7 @@ function renderBills() {
     </div>`;
   }).join('');
   const paidCount = S.paidBills.length;
-  document.getElementById('bills-inner').innerHTML = `${rows}
+  document.getElementById('bills-this').innerHTML = `${rows}
     <div class="bills-total">
       <span>Monthly total <span style="font-size:11px;color:var(--muted);font-weight:600">${paidCount}/${BILLS.length} paid</span></span>
       <span>${fmt(jar1Target())}</span>

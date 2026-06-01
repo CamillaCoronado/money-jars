@@ -905,7 +905,7 @@ const totalExpenses = () =>
 function jarAmounts() {
   const t1        = jar1Target();
   const tot       = totalIn();
-  const savTarget = S.savingsItems.reduce((a, i) => a + (i.target || 0), 0);
+  const savTarget = savingsTarget();
   const expenses  = totalExpenses();
 
   // Fill order: bills → savings → free money
@@ -1317,7 +1317,8 @@ function toggleBills() {
 // ── Rendering ────────────────────────────────────────────────
 function refreshAll(animate = true) { refreshJars(animate); refreshIncome(); renderLogs(); renderGasLog(); renderPersonalLog(); renderSavings(); }
 
-const savingsTotal = () => S.savingsItems.reduce((a, i) => a + (i.funded || 0), 0);
+const savingsTotal  = () => S.savingsItems.filter(i => !i.completed).reduce((a, i) => a + (i.funded || 0), 0);
+const savingsTarget = () => S.savingsItems.filter(i => !i.completed).reduce((a, i) => a + (i.target || 0), 0);
 
 const _prevPct = { j1: 0, j2: 0, j3: 0 };
 
@@ -1649,11 +1650,17 @@ function fundSavingsGoal(id) {
   const amt = +(input) || 0;
   if (amt <= 0) return;
   item.funded = Math.min(item.target, item.funded + amt);
+  if (item.funded >= item.target) {
+    item.completed = true;
+    soundFull();
+    toast(`🎉 "${item.name}" goal completed!`);
+  } else {
+    soundCoin();
+    toast(`🐷 ${fmt(amt)} added to "${item.name}"`);
+  }
   refreshJars();
   saveSettings();
   renderSavings();
-  soundCoin();
-  toast(`🐷 ${fmt(amt)} added to "${item.name}"`);
 }
 
 function deleteSavingsItem(id) {
@@ -1667,6 +1674,10 @@ function renderSavings() {
   const list     = document.getElementById('savings-list');
   const totalRow = document.getElementById('savings-total-row');
   const jarCard  = document.getElementById('jar-save-card');
+
+  const active    = S.savingsItems.filter(i => !i.completed);
+  const completed = S.savingsItems.filter(i => i.completed);
+
   if (!S.savingsItems.length) {
     list.innerHTML = '<div class="log-empty">No goals yet</div>';
     totalRow.style.display = 'none';
@@ -1674,7 +1685,8 @@ function renderSavings() {
     return;
   }
   jarCard.style.display = 'flex';
-  list.innerHTML = S.savingsItems.map(i => {
+
+  const activeHTML = active.map(i => {
     const pct = i.target > 0 ? Math.min(100, Math.round((i.funded / i.target) * 100)) : 0;
     return `<div class="savings-item">
       <div>
@@ -1683,10 +1695,25 @@ function renderSavings() {
       </div>
       <div class="savings-item-right">
         <button class="btn btn-ghost-sm" style="font-size:11px;padding:4px 10px" onclick="fundSavingsGoal(${i.id})">+ Add</button>
-        <button class="savings-del" onclick="deleteSavingsItem(${i.id})" title="Delete">✕</button>
+        <button class="savings-del" onclick="deleteSavingsItem(${i.id})">✕</button>
       </div>
     </div>`;
   }).join('');
+
+  const completedHTML = completed.length ? `
+    <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:6px">✓ COMPLETED</div>
+      ${completed.map(i => `
+        <div class="savings-item" style="opacity:0.5">
+          <div>
+            <div class="savings-item-name" style="text-decoration:line-through">${i.name}</div>
+            <div style="font-size:11px;color:var(--muted)">${fmt(i.funded)} saved ✓</div>
+          </div>
+          <button class="savings-del" onclick="deleteSavingsItem(${i.id})">✕</button>
+        </div>`).join('')}
+    </div>` : '';
+
+  list.innerHTML = activeHTML + completedHTML;
   set('savings-total', fmt(savingsTotal()));
   totalRow.style.display = 'flex';
 }

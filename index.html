@@ -459,7 +459,6 @@
   <div class="login-card">
     <div class="login-emoji">🫙</div>
     <h1>Money Jars</h1>
-    <p>Expenses first.<br>Then what's yours to keep.</p>
     <button class="btn-google" id="btn-sign-in">
       <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -485,7 +484,7 @@
 
   <div class="header">
     <div class="badge">🫙 Money Jars</div>
-    <h1>Expenses first. Then what's yours.</h1>
+    <h1>Money Jars</h1>
     <p>Fill the bills jar before the free money jar can grow.</p>
   </div>
 
@@ -874,7 +873,7 @@ const FIXED = 644;
 
 // ── App state ────────────────────────────────────────────────
 let uid     = null;
-let S       = { bank: 0, openingBalance: 0, mpg: 0, odo: 0, tankPct: 0, lastCarryOverMonth: '', savingsItems: [], customExpenses: [], shifts: [], paychecks: [], gasFillups: [], personalTrips: [], paidBills: [] };
+let S       = { bank: 0, openingBalance: 0, mpg: 0, odo: 0, tankPct: 0, lastCarryOverMonth: '', savingsMigrated: false, savingsItems: [], customExpenses: [], shifts: [], paychecks: [], gasFillups: [], personalTrips: [], paidBills: [] };
 let preview = null;
 
 function month() {
@@ -941,7 +940,8 @@ async function loadData() {
     S.mpg               = d.mpg               || 0;
     S.odo               = d.odo               || 0;
     S.tankPct           = d.tankPct           || 0;
-    S.savingsItems      = d.savingsItems      || null; // null = not yet migrated
+    S.savingsItems      = d.savingsItems      || [];
+    S.savingsMigrated   = d.savingsMigrated   || false;
     S.lastCarryOverMonth = d.lastCarryOverMonth || '';
   }
   const mSnap = await getDoc(doc(db, 'users', uid, 'months', month()));
@@ -957,18 +957,16 @@ async function loadData() {
     S.shifts = []; S.paychecks = []; S.gasFillups = []; S.personalTrips = []; S.customExpenses = []; S.paidBills = [];
   }
 
-  // Migrate savingsItems from month data to settings if not yet there
-  if (S.savingsItems === null) {
-    // Try current month first, then previous month
-    const sources = [month(), prevMonth()];
-    S.savingsItems = [];
-    for (const key of sources) {
+  // Migrate savingsItems from month data to settings (runs once)
+  if (!S.savingsMigrated) {
+    for (const key of [month(), prevMonth()]) {
       const snap = await getDoc(doc(db, 'users', uid, 'months', key));
       if (snap.exists() && snap.data().savingsItems?.length) {
         S.savingsItems = snap.data().savingsItems;
         break;
       }
     }
+    S.savingsMigrated = true;
     await saveSettings();
   }
 
@@ -1003,7 +1001,7 @@ async function saveSettings() {
     await setDoc(doc(db, 'users', uid, 'data', 'settings'), {
     bank: S.bank, openingBalance: S.openingBalance,
     mpg: S.mpg, odo: S.odo, tankPct: S.tankPct,
-    savingsItems: S.savingsItems, lastCarryOverMonth: S.lastCarryOverMonth,
+    savingsItems: S.savingsItems, lastCarryOverMonth: S.lastCarryOverMonth, savingsMigrated: S.savingsMigrated,
   });
   } catch (e) {
     console.error('saveSettings failed:', e);

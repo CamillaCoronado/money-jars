@@ -629,6 +629,13 @@
         </div>
       </div>
     </div>
+    <div class="ig" style="margin-top:10px;margin-bottom:0">
+      <div class="il">Odometer at fill-up <span class="saved">auto-filled</span></div>
+      <div class="iw">
+        <input type="number" id="g-fillup-odo" placeholder="0" min="0" step="1" class="sp">
+        <span class="sfx">mi</span>
+      </div>
+    </div>
     <div class="gas-preview-row" id="gas-preview" style="display:none">
       <span class="gas-preview-lbl">⛽ Total cost</span>
       <span class="gas-preview-val" id="g-total">—</span>
@@ -733,9 +740,12 @@
     <div class="card" style="margin-bottom:0">
       <div class="sec-title"><div class="dot"></div>Log a Shift</div>
       <div class="ig">
-        <div class="il">Miles Driven</div>
+        <div class="il" style="justify-content:space-between">
+          End Odometer
+          <span id="s-odo-start" style="font-size:10px;color:var(--muted);font-weight:600"></span>
+        </div>
         <div class="iw">
-          <input type="number" id="s-mi" placeholder="0" min="0" step="0.1" class="sp">
+          <input type="number" id="s-odo-end" placeholder="0" min="0" step="1" class="sp">
           <span class="sfx">mi</span>
         </div>
       </div>
@@ -753,44 +763,30 @@
           <span class="sfx">hrs</span>
         </div>
       </div>
-      <div class="ig">
-        <div class="il">Gas Price</div>
-        <div class="iw">
-          <span class="pfx">$</span>
-          <input type="number" id="s-gas" placeholder="0.00" min="0" step="0.01" class="pp sp">
-          <span class="sfx">/ gal</span>
-        </div>
-      </div>
-      <div class="ig">
-        <div class="il">Rolling MPG <span class="saved">saved</span></div>
-        <div class="iw">
-          <input type="number" id="s-mpg" placeholder="0.0" min="1" step="0.1" class="sp">
-          <span class="sfx">mpg</span>
-        </div>
-      </div>
       <div id="shift-preview" style="display:none">
         <div class="tiles">
           <div class="tile">
-            <div class="t-lbl">⛽ Gas</div>
-            <div class="t-val neg" id="p-gas">—</div>
+            <div class="t-lbl">🚗 Miles <span id="p-mpg-rate" style="font-size:9px;color:var(--muted)"></span></div>
+            <div class="t-val" id="p-mi">—</div>
           </div>
           <div class="tile">
-            <div class="t-lbl">🏠 Rent <span class="cap" id="p-cap" style="display:none">CAPPED</span></div>
-            <div class="t-val neg" id="p-rent">—</div>
+            <div class="t-lbl">⛽ Gas <span id="p-gas-rate" style="font-size:9px;color:var(--muted)"></span></div>
+            <div class="t-val neg" id="p-gas">—</div>
           </div>
           <div class="tile" style="background:var(--green-light)">
             <div class="t-lbl" style="color:var(--green)">💸 Take Home</div>
             <div class="t-val" style="color:var(--green)" id="p-home">—</div>
           </div>
           <div class="tile" style="background:var(--primary-light)">
-            <div class="t-lbl" style="color:var(--primary)">⏱️ Hourly</div>
+            <div class="t-lbl" style="color:var(--primary)">⏱️ /hr after gas</div>
             <div class="t-val" style="color:var(--primary)" id="p-hrly">—</div>
           </div>
         </div>
         <div class="hero">
           <div class="hero-lbl">Real Hourly Rate</div>
           <div class="hero-val" id="p-hero">—</div>
-          <div class="hero-sub">after gas & rent</div>
+          <div class="hero-sub">after gas</div>
+
         </div>
         <button class="btn-full btn-purple-full" id="btn-log-shift">Log this shift →</button>
       </div>
@@ -873,7 +869,7 @@ const FIXED = 644;
 
 // ── App state ────────────────────────────────────────────────
 let uid     = null;
-let S       = { bank: 0, openingBalance: 0, mpg: 0, odo: 0, tankPct: 0, lastCarryOverMonth: '', savingsMigrated: false, savingsItems: [], customExpenses: [], shifts: [], paychecks: [], gasFillups: [], personalTrips: [], paidBills: [] };
+let S       = { bank: 0, openingBalance: 0, odo: 0, tankPct: 0, lastGasPrice: 0, lastFillups: [], lastCarryOverMonth: '', savingsMigrated: false, savingsItems: [], customExpenses: [], shifts: [], paychecks: [], gasFillups: [], personalTrips: [], paidBills: [] };
 let preview = null;
 
 function month() {
@@ -889,7 +885,7 @@ function prevMonth() {
 
 // ── Derived ──────────────────────────────────────────────────
 const rentPaid   = () => Math.min(
-  S.shifts.reduce((a, s) => a + s.rentShare, 0) +
+  S.shifts.reduce((a, s) => a + (s.rentShare || 0), 0) +
   S.paychecks.reduce((a, p) => a + p.amount / 3, 0),
   RENT_CAP
 );
@@ -937,9 +933,10 @@ async function loadData() {
     const d = settSnap.data();
     S.bank              = d.bank              || 0;
     S.openingBalance    = d.openingBalance    || 0;
-    S.mpg               = d.mpg               || 0;
     S.odo               = d.odo               || 0;
     S.tankPct           = d.tankPct           || 0;
+    S.lastGasPrice      = d.lastGasPrice      || 0;
+    S.lastFillups       = d.lastFillups       || [];
     S.savingsItems      = d.savingsItems      || [];
     S.savingsMigrated   = d.savingsMigrated   || false;
     S.lastCarryOverMonth = d.lastCarryOverMonth || '';
@@ -955,6 +952,20 @@ async function loadData() {
     S.paidBills       = d.paidBills       || [];
   } else {
     S.shifts = []; S.paychecks = []; S.gasFillups = []; S.personalTrips = []; S.customExpenses = []; S.paidBills = [];
+  }
+
+  // Always pull last gas price if missing
+  if (!S.lastGasPrice) {
+    const currentFillup = S.gasFillups && [...S.gasFillups].reverse().find(g => g.pricePer > 0);
+    if (currentFillup) {
+      S.lastGasPrice = currentFillup.pricePer;
+    } else {
+      const pSnap = await getDoc(doc(db, 'users', uid, 'months', prevMonth()));
+      if (pSnap.exists()) {
+        const last = [...(pSnap.data().gasFillups || [])].reverse().find(g => g.pricePer > 0);
+        if (last) { S.lastGasPrice = last.pricePer; await saveSettings(); }
+      }
+    }
   }
 
   // Migrate savingsItems from month data to settings (runs once)
@@ -1000,7 +1011,7 @@ async function saveSettings() {
   try {
     await setDoc(doc(db, 'users', uid, 'data', 'settings'), {
     bank: S.bank, openingBalance: S.openingBalance,
-    mpg: S.mpg, odo: S.odo, tankPct: S.tankPct,
+    odo: S.odo, tankPct: S.tankPct, lastGasPrice: S.lastGasPrice, lastFillups: S.lastFillups,
     savingsItems: S.savingsItems, lastCarryOverMonth: S.lastCarryOverMonth, savingsMigrated: S.savingsMigrated,
   });
   } catch (e) {
@@ -1030,7 +1041,7 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display          = 'block';
     await loadData();
-    if (S.mpg)  document.getElementById('s-mpg').value   = S.mpg;
+    if (S.odo) document.getElementById('g-fillup-odo').value = S.odo;
     if (S.bank) {
       const bi = document.getElementById('bank-inp');
       const bd = document.getElementById('bank-display');
@@ -1038,7 +1049,10 @@ onAuthStateChanged(auth, async (user) => {
       if (bd) bd.textContent = fmt(S.bank);
     }
     if (S.openingBalance) document.getElementById('opening-inp').value = S.openingBalance;
-    if (S.odo)     document.getElementById('g-odo').value   = S.odo;
+    if (S.odo) {
+      document.getElementById('g-odo').value = S.odo;
+      document.getElementById('s-odo-start').textContent = `Start: ${S.odo.toLocaleString()} mi`;
+    }
     if (S.tankPct) document.getElementById('g-tank').value  = S.tankPct;
     populateJarDecor();
     renderCustomExp();
@@ -1054,40 +1068,36 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // ── Actions ──────────────────────────────────────────────────
-function onMpg() {
-  const v = +(document.getElementById('s-mpg').value);
-  if (v > 0) { S.mpg = v; saveSettings(); }
-  calcShift();
-}
 
 function calcShift() {
-  const mi   = +(document.getElementById('s-mi').value)   || 0;
-  const earn = +(document.getElementById('s-earn').value) || 0;
-  const hrs  = +(document.getElementById('s-hrs').value)  || 0;
-  const gas  = +(document.getElementById('s-gas').value)  || 0;
-  const mpg  = +(document.getElementById('s-mpg').value)  || 0;
+  const odoEnd = +(document.getElementById('s-odo-end').value) || 0;
+  const earn   = +(document.getElementById('s-earn').value)    || 0;
+  const hrs    = +(document.getElementById('s-hrs').value)     || 0;
+  const mpg    = autoMpg();
+  const lastFillup = [...S.gasFillups].reverse().find(g => g.pricePer > 0);
+  const gas    = lastFillup?.pricePer || S.lastGasPrice || 0;
+  const mi     = S.odo > 0 && odoEnd > S.odo ? +(odoEnd - S.odo).toFixed(1) : 0;
 
-  if (!earn && !mi) { document.getElementById('shift-preview').style.display = 'none'; preview = null; return; }
+  // Show start odometer label
+  document.getElementById('s-odo-start').textContent = S.odo > 0 ? `Start: ${S.odo.toLocaleString()} mi` : '';
 
-  const gasCost = mpg > 0 ? (mi / mpg) * gas : 0;
-  const rRaw    = earn / 3;
-  const rPaid   = rentPaid();
-  let rentShare, capped;
-  if (rPaid + rRaw > RENT_CAP) {
-    rentShare = Math.max(0, RENT_CAP - rPaid); capped = true;
-  } else {
-    rentShare = rRaw; capped = false;
-  }
-  const takeHome = earn - gasCost - rentShare;
-  const hourly   = hrs > 0 ? takeHome / hrs : null;
+  if (!earn) { document.getElementById('shift-preview').style.display = 'none'; preview = null; return; }
 
-  preview = { mi, earn, hrs, gasCost, rentShare, takeHome, hourly };
-  set('p-gas',  `−${fmt(gasCost)}`);
-  set('p-rent', `−${fmt(rentShare)}`);
-  set('p-home', fmt(takeHome));
-  set('p-hrly', hourly !== null ? fmt(hourly) : '—');
-  set('p-hero', hourly !== null ? fmt(hourly) : '—');
-  document.getElementById('p-cap').style.display = capped ? 'inline' : 'none';
+  const gasCost   = mpg > 0 && mi > 0 ? (mi / mpg) * gas : 0;
+  const rRaw      = earn / 3;
+  const rPaid     = rentPaid();
+  const rentShare = rPaid + rRaw > RENT_CAP ? Math.max(0, RENT_CAP - rPaid) : rRaw;
+  const takeHome  = earn - gasCost;
+  const hourly    = hrs > 0 ? takeHome / hrs : null;
+
+  preview = { mi, earn, hrs, gasCost, rentShare, takeHome, hourly, odoEnd };
+  set('p-mi',       mi > 0 ? `${mi} mi` : '—');
+  set('p-mpg-rate', mpg > 0 ? `@ ${mpg} mpg` : '');
+  set('p-gas',      `−${fmt(gasCost)}`);
+  set('p-gas-rate', gas > 0 ? `@ $${gas.toFixed(2)}/gal` : 'no price saved');
+  set('p-home',     fmt(takeHome));
+  set('p-hrly',     hourly !== null ? fmt(hourly) : '—');
+  set('p-hero',     hourly !== null ? fmt(hourly) : '—');
   document.getElementById('shift-preview').style.display = 'block';
 }
 
@@ -1099,8 +1109,15 @@ function logShift() {
     mi: preview.mi, earn: preview.earn, hrs: preview.hrs,
     gasCost: preview.gasCost, rentShare: preview.rentShare, takeHome: preview.takeHome,
   });
+  // Update odometer to end reading
+  if (preview.odoEnd > 0) {
+    S.odo = preview.odoEnd;
+    const odoEl = document.getElementById('g-odo');
+    if (odoEl) odoEl.value = S.odo;
+    saveSettings();
+  }
   saveMonthData();
-  ['s-mi','s-earn','s-hrs','s-gas'].forEach(id => document.getElementById(id).value = '');
+  ['s-odo-end','s-earn','s-hrs'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('shift-preview').style.display = 'none';
   preview = null;
   refreshAll();
@@ -1135,23 +1152,54 @@ function calcGas() {
   }
 }
 
+function autoMpg() {
+  // Combine persistent lastFillups with current month's fill-ups, deduplicate by id
+  const seen = new Set();
+  const all  = [...(S.lastFillups || []), ...S.gasFillups]
+    .filter(g => g.odo > 0 && !seen.has(g.id) && seen.add(g.id))
+    .sort((a, b) => a.odo - b.odo);
+  if (all.length < 2) return 40;
+  const last  = all[all.length - 1];
+  const prev  = all[all.length - 2];
+  const miles = last.odo - prev.odo;
+  if (miles <= 0 || last.gallons <= 0) return 40;
+  const mpg = +(miles / last.gallons).toFixed(1);
+  return (mpg >= 10 && mpg <= 100) ? mpg : 40;
+}
+
 function logGasFillup() {
-  const gal   = +(document.getElementById('g-gal').value) || 0;
-  const ppg   = +(document.getElementById('g-ppg').value) || 0;
+  const gal   = +(document.getElementById('g-gal').value)        || 0;
+  const ppg   = +(document.getElementById('g-ppg').value)        || 0;
+  const odo   = +(document.getElementById('g-fillup-odo').value) || S.odo || 0;
   const total = gal * ppg;
   if (total <= 0) { toast('⚠️ Enter gallons and price first'); return; }
   S.gasFillups.push({
     id: Date.now(),
     date: new Date().toLocaleDateString('en-US', { month:'short', day:'numeric' }),
-    gallons: gal, pricePer: ppg, total,
+    gallons: gal, pricePer: ppg, total, odo,
   });
+  S.lastGasPrice = ppg;
+  // Keep last 3 fill-ups with odo in settings so MPG can be calculated across months
+  if (odo > 0) {
+    const entry = { id: Date.now(), gallons: gal, pricePer: ppg, odo };
+    S.lastFillups = [...(S.lastFillups || []), entry].filter(g => g.odo > 0).slice(-3);
+  }
+  // Update saved odometer and auto-recalculate MPG
+  if (odo > 0) {
+    S.odo = odo;
+    document.getElementById('g-odo').value = S.odo;
+    document.getElementById('s-odo-start').textContent = `Start: ${S.odo.toLocaleString()} mi`;
+  }
+  const mpg = autoMpg();
+  toast(`⛽ ${gal.toFixed(3)} gal logged — ${fmt(total)}${mpg > 0 ? ` · ${mpg} mpg` : ''}`);
   saveMonthData();
+  saveSettings();
   document.getElementById('g-gal').value = '';
   document.getElementById('g-ppg').value = '';
+  document.getElementById('g-fillup-odo').value = '';
   document.getElementById('gas-preview').style.display = 'none';
   renderGasLog();
   soundCoin();
-  toast(`⛽ ${gal.toFixed(3)} gal logged — ${fmt(total)}`);
 }
 
 function renderGasLog() {
@@ -1762,11 +1810,9 @@ document.getElementById('btn-sign-out').addEventListener('click', () => signOut(
 document.getElementById('btn-log-shift').addEventListener('click', logShift);
 document.getElementById('btn-add-paycheck').addEventListener('click', addPaycheck);
 document.getElementById('bills-toggle').addEventListener('click', toggleBills);
-document.getElementById('s-mi').addEventListener('input',   calcShift);
+document.getElementById('s-odo-end').addEventListener('input', calcShift);
 document.getElementById('s-earn').addEventListener('input',  calcShift);
 document.getElementById('s-hrs').addEventListener('input',   calcShift);
-document.getElementById('s-gas').addEventListener('input',   calcShift);
-document.getElementById('s-mpg').addEventListener('input',   onMpg);
 document.getElementById('g-gal').addEventListener('input',   calcGas);
 document.getElementById('g-ppg').addEventListener('input',   calcGas);
 document.getElementById('btn-log-gas').addEventListener('click', logGasFillup);

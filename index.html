@@ -113,14 +113,20 @@
     }
     .lbl { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 2px; }
     .bank-val { font-size: 22px; font-weight: 800; }
-    .auto-badge {
-      font-size: 11px;
-      background: var(--primary-light);
-      padding: 4px 10px;
-      border-radius: 100px;
-      color: var(--primary);
-      font-weight: 600;
+    .bank-edit { display: flex; align-items: center; gap: 8px; }
+    .inp-wrap { position: relative; }
+    .pfx-icon {
+      position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
+      font-size: 13px; font-weight: 600; color: var(--muted); pointer-events: none;
     }
+    .bank-inp {
+      width: 130px; padding: 8px 10px 8px 24px;
+      font-family: inherit; font-size: 15px; font-weight: 700; color: var(--text);
+      background: var(--bg); border: 2px solid var(--border); border-radius: 10px;
+      outline: none; transition: border-color .15s; -moz-appearance: textfield; appearance: textfield;
+    }
+    .bank-inp::-webkit-inner-spin-button, .bank-inp::-webkit-outer-spin-button { -webkit-appearance: none; }
+    .bank-inp:focus { border-color: var(--primary); }
 
     /* ── Buttons ── */
     .btn {
@@ -488,11 +494,17 @@
     <div class="bank-left">
       <div class="bank-icon">🏦</div>
       <div>
-        <div class="lbl">Available to spend</div>
+        <div class="lbl">Bank balance</div>
         <div class="bank-val" id="bank-display">$0.00</div>
       </div>
     </div>
-    <div class="auto-badge">✨ Auto-calculated from income</div>
+    <div class="bank-edit">
+      <div class="inp-wrap">
+        <span class="pfx-icon">$</span>
+        <input type="number" class="bank-inp" id="bank-inp" placeholder="0.00" min="0" step="0.01">
+      </div>
+      <button class="btn btn-purple-sm" id="btn-bank">Update</button>
+    </div>
   </div>
 
   <!-- Two jars -->
@@ -1101,6 +1113,15 @@ function renderGasLog() {
     : '<div class="log-empty">No fill-ups yet</div>';
 }
 
+function saveBank() {
+  S.bank = +(document.getElementById('bank-inp').value) || 0;
+  document.getElementById('bank-display').textContent = fmt(S.bank);
+  saveSettings();
+  refreshJars();
+  refreshIncome();
+  toast('🏦 Balance updated');
+}
+
 function saveOpening() {
   S.openingBalance = +(document.getElementById('opening-inp').value) || 0;
   saveSettings();
@@ -1225,7 +1246,7 @@ function refreshJars(animate = true) {
   }
 
   // Update the bank display (auto-calculated)
-  document.getElementById('bank-display').textContent = fmt(totalIn() - a1 - a3);
+  document.getElementById('bank-display').textContent = fmt(S.bank);
 
   if (!animate) { _prevPct.j1 = p1; _prevPct.j2 = p2; _prevPct.j3 = p3; return; }
 
@@ -1553,6 +1574,7 @@ function renderCustomExp() {
 
 // ── Wire up events ───────────────────────────────────────────
 document.getElementById('btn-sign-in').addEventListener('click',  () => signInWithPopup(auth, provider).catch(() => toast('⚠️ Sign in failed')));
+document.getElementById('btn-bank').addEventListener('click', saveBank);
 document.getElementById('btn-sign-out').addEventListener('click', () => signOut(auth));
 document.getElementById('btn-log-shift').addEventListener('click', logShift);
 document.getElementById('btn-add-paycheck').addEventListener('click', addPaycheck);

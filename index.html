@@ -211,6 +211,17 @@
     .jar-exp .jar-lid  { background: var(--bee-yellow); }
     .jar-exp .jar-neck { border-color: var(--bee-dark); }
     .jar-exp .jar-body { border-color: var(--bee-dark); border-width: 4px; }
+    .jar-shelf {
+      position: absolute; bottom: 58.9%; left: -4px; right: -4px;
+      height: 4px; background: var(--bee-dark); border-radius: 2px;
+      z-index: 4; pointer-events: none;
+    }
+    .jar-fill-rent {
+      position: absolute; bottom: 58.9%; left: 0; right: 0;
+      height: 0%; z-index: 1;
+      transition: height 1.2s cubic-bezier(.34,1.56,.64,1);
+    }
+    .jar-exp .jar-fill-rent  { background: linear-gradient(to top, #B87800, #FFD93D 55%, #FFF4A0); }
     .jar-exp .jar-fill { background: linear-gradient(to top, #B87800, #FFD93D 55%, #FFF4A0); }
     .jar-exp .wave { display: none; }
     .jar-free .jar-lid  { background: var(--puppy-pink); }
@@ -508,14 +519,15 @@
         <div class="jar-neck"></div>
         <div class="jar-body">
           <div class="jar-fill" id="j1-fill"><div class="wave"></div></div>
+          <div class="jar-fill-rent" id="j1-fill-rent"></div>
+          <div class="jar-shelf"></div>
         </div>
       </div>
       <div class="jar-info">
         <div class="jar-name">🧾 Bills Jar</div>
-        <div class="jar-amt" id="j1-amt">$0</div>
-        <div class="jar-sub" id="j1-sub">of $644 + $450</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px">🏠 <span id="j1-rent">$0</span> / $450 rent</div>
-        <span class="jar-pill" id="j1-pill">0%</span>
+        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-top:4px">🧾 <span id="j1-fixed-amt">$0</span> / $644 fixed</div>
+        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-top:2px">🏠 <span id="j1-rent">$0</span> / $450 rent</div>
+        <span class="jar-pill" id="j1-pill" style="margin-top:6px">0%</span>
       </div>
     </div>
     <div class="jar-card jar-free">
@@ -639,20 +651,6 @@
   <!-- Income this month -->
   <div class="card">
     <div class="sec-title"><div class="dot"></div>Income This Month</div>
-    <div class="income-row">
-      <span class="income-lbl" style="display:flex;align-items:center;gap:7px">
-        📅 Prior income
-        <button class="btn btn-ghost-sm" id="btn-edit-opening" style="font-size:10px;padding:3px 8px;line-height:1.3">edit</button>
-      </span>
-      <span class="income-val" id="inc-opening">$0.00</span>
-    </div>
-    <div class="opening-edit" id="opening-edit">
-      <div class="iw" style="flex:1">
-        <span class="pfx">$</span>
-        <input type="number" id="opening-inp" placeholder="Paycheck or income before you started tracking" min="0" step="0.01" class="pp" style="font-size:13px">
-      </div>
-      <button class="btn btn-purple-sm" id="btn-save-opening">Save</button>
-    </div>
     <div class="income-row">
       <span class="income-lbl">🚗 Gig gross</span>
       <span class="income-val" id="inc-gig">$0.00</span>
@@ -1009,9 +1007,6 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display          = 'block';
     await loadData();
-    if (S.odo) document.getElementById('g-fillup-odo').value = S.odo;
-    if (S.openingBalance) document.getElementById('opening-inp').value = S.openingBalance;
-    if (S.odo) document.getElementById('g-fillup-odo').value = S.odo;
     if (S.shiftStartOdo) {
       document.getElementById('shift-start-status').textContent = 'saved ✓';
     }
@@ -1282,7 +1277,8 @@ function renderPersonalLog() {
 
 function populateJarDecor() {
   const configs = [
-    { id: 'j1-fill', items: ['coin','coin','⭐','coin','⭐','coin','⭐','coin'] },
+    { id: 'j1-fill',      items: ['coin','coin','⭐','coin','⭐','coin','⭐','coin'] },
+    { id: 'j1-fill-rent', items: ['coin','coin','⭐','coin','⭐','coin','⭐','coin'] },
     { id: 'j2-fill', items: ['💵','💵','💜','✨','💵','🌟','💵','⭐'] },
     { id: 'j3-fill', items: ['🐷','💰','💙','🐷','💰','💙','🐷','💰'] },
   ];
@@ -1330,11 +1326,18 @@ function refreshJars(animate = true) {
   const jar3El = document.querySelector('.jar-save');
   const prev1 = _prevPct.j1, prev2 = _prevPct.j2, prev3 = _prevPct.j3;
 
-  setFill('j1-fill', p1);
-  set('j1-amt',  fmt(a1));
-  set('j1-sub',  `of ${fmt(FIXED)} + ${fmt(RENT_CAP)}`);
-  set('j1-rent', fmt(Math.min(rentPaid(), RENT_CAP)));
-  set('j1-pill', `${Math.round(p1)}% covered`);
+  // Bottom section: fixed bills (capped at 58.9% of jar)
+  const fixedPct = Math.min(p1, (FIXED / jar1Target()) * 100);
+  setFill('j1-fill', fixedPct);
+  // Top section: rent (fills from 0→41.1% within its zone)
+  const rentAmt   = Math.min(rentPaid(), RENT_CAP);
+  const rentPct   = (rentAmt / RENT_CAP) * (RENT_CAP / jar1Target()) * 100;
+  document.getElementById('j1-fill-rent').style.height = `${rentPct}%`;
+  const rentDisplay  = Math.min(rentAmt, RENT_CAP);
+  const fixedDisplay = Math.min(Math.max(0, a1 - rentDisplay), FIXED);
+  set('j1-rent',      fmt(rentDisplay));
+  set('j1-fixed-amt', fmt(fixedDisplay));
+  set('j1-pill',      `${Math.round(p1)}% covered`);
 
   setFill('j2-fill', p2);
   set('j2-amt', fmt(a2));
@@ -1437,7 +1440,6 @@ async function loadHistory() {
 }
 
 function refreshIncome() {
-  set('inc-opening', fmt(S.openingBalance));
   set('inc-gig',     fmt(gigIncome()));
   set('inc-pay',     fmt(payIncome()));
   set('inc-total',   fmt(gigIncome() + payIncome()));
@@ -1502,21 +1504,53 @@ function renderBills() {
 
 window.toggleBillPaid = toggleBillPaid;
 
+function editShift(id) {
+  const s = S.shifts.find(x => x.id === id);
+  if (!s) return;
+  document.getElementById('s-earn').value = s.earn;
+  document.getElementById('s-hrs').value  = s.hrs || '';
+  S.shifts = S.shifts.filter(x => x.id !== id);
+  saveMonthData();
+  refreshAll();
+  calcShift();
+  toast('✏️ Shift ready to edit');
+}
+
+function editPaycheck(id) {
+  const p = S.paychecks.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('pc-amt').value = p.amount;
+  document.getElementById('pc-lbl').value = p.label !== 'Paycheck' ? p.label : '';
+  S.paychecks = S.paychecks.filter(x => x.id !== id);
+  saveMonthData();
+  refreshAll();
+  toast('✏️ Paycheck ready to edit');
+}
+
+window.editShift    = editShift;
+window.editPaycheck = editPaycheck;
+
 function renderLogs() {
   const sl = document.getElementById('shift-log');
   const pl = document.getElementById('pay-log');
   sl.innerHTML = S.shifts.length
     ? [...S.shifts].reverse().slice(0,6).map(s =>
         `<div class="log-item">
-          <span class="log-l">${s.date} · ${s.mi}mi · ${fmt(s.earn)} gross</span>
-          <span class="log-r">${fmt(s.takeHome)}</span>
+          <span class="log-l">${s.date} · ${fmt(s.earn)} gross${s.hrs ? ' · ' + s.hrs + 'hrs' : ''}</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="log-r">${fmt(s.earn)}</span>
+            <button class="savings-del" onclick="editShift(${s.id})" title="Edit">✎</button>
+          </div>
         </div>`).join('')
     : '<div class="log-empty">No shifts yet</div>';
   pl.innerHTML = S.paychecks.length
     ? [...S.paychecks].reverse().slice(0,6).map(p =>
         `<div class="log-item">
           <span class="log-l">${p.date} · ${p.label}</span>
-          <span class="log-r">${fmt(p.amount)}</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="log-r">${fmt(p.amount)}</span>
+            <button class="savings-del" onclick="editPaycheck(${p.id})" title="Edit">✎</button>
+          </div>
         </div>`).join('')
     : '<div class="log-empty">No paychecks yet</div>';
 }
@@ -1770,10 +1804,6 @@ document.getElementById('g-ppg').addEventListener('input',   calcGas);
 document.getElementById('btn-log-gas').addEventListener('click', logGasFillup);
 document.getElementById('btn-add-goal').addEventListener('click', addSavingsGoal);
 document.getElementById('btn-add-exp').addEventListener('click', addCustomExp);
-document.getElementById('btn-edit-opening').addEventListener('click', () => {
-  document.getElementById('opening-edit').classList.toggle('open');
-});
-document.getElementById('btn-save-opening').addEventListener('click', saveOpening);
 </script>
 </body>
 </html>

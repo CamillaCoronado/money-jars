@@ -488,22 +488,16 @@
     <p>Fill the bills jar before the free money jar can grow.</p>
   </div>
 
-  <!-- Bank balance (auto-calculated, read-only) -->
+  <!-- Bank balance (auto-calculated) -->
   <div class="bank-bar">
     <div class="bank-left">
       <div class="bank-icon">🏦</div>
       <div>
-        <div class="lbl">Bank balance</div>
+        <div class="lbl">Available balance</div>
         <div class="bank-val" id="bank-display">$0.00</div>
       </div>
     </div>
-    <div class="bank-edit">
-      <div class="inp-wrap">
-        <span class="pfx-icon">$</span>
-        <input type="number" class="bank-inp" id="bank-inp" placeholder="0.00" min="0" step="0.01">
-      </div>
-      <button class="btn btn-purple-sm" id="btn-bank">Update</button>
-    </div>
+    <div style="font-size:11px;color:var(--muted);font-weight:600">auto-calculated</div>
   </div>
 
   <!-- Two jars -->
@@ -587,31 +581,20 @@
           </div>
         </div>
       </div>
+      <div class="ig" style="margin-top:10px;margin-bottom:0">
+        <div class="il">Which jar</div>
+        <select id="ce-jar" style="width:100%;padding:11px 14px;font-family:inherit;font-size:15px;font-weight:700;color:var(--text);background:#F9F9FB;border:2px solid var(--border);border-radius:12px;outline:none">
+          <option value="free">✨ Free Money</option>
+          <option value="bills">🧾 Bills</option>
+          <option value="savings">🐷 Savings</option>
+        </select>
+      </div>
       <button class="btn btn-ghost-sm" id="btn-add-exp" style="width:100%;padding:9px;margin-top:10px">+ Add Expense</button>
     </div>
   </div>
 
   <!-- Gas fill-up tracker -->
   <div class="card" style="margin-bottom:16px">
-    <div class="sec-title"><div class="dot dot-gas"></div>Odometer &amp; Tank</div>
-    <div class="two-col" style="margin-bottom:10px">
-      <div class="ig" style="margin-bottom:0">
-        <div class="il">Odometer <span class="saved">saved</span></div>
-        <div class="iw">
-          <input type="number" id="g-odo" placeholder="0" min="0" step="1" class="sp">
-          <span class="sfx">mi</span>
-        </div>
-      </div>
-      <div class="ig" style="margin-bottom:0">
-        <div class="il">Tank level <span class="saved">saved</span></div>
-        <div class="iw">
-          <input type="number" id="g-tank" placeholder="0–100" min="0" max="100" step="1" class="sp">
-          <span class="sfx">%</span>
-        </div>
-      </div>
-    </div>
-    <button class="btn btn-ghost-sm" id="btn-save-tank" style="width:100%;padding:9px;margin-bottom:16px">💾 Save readings</button>
-    <div style="border-top:1px solid var(--border);padding-top:14px">
     <div class="sec-title" style="margin-bottom:12px"><div class="dot dot-gas"></div>Log Gas Fill-up</div>
     <div class="two-col">
       <div class="ig" style="margin-bottom:0">
@@ -652,31 +635,6 @@
     </div>
   </div>
 
-  <!-- Personal mileage -->
-  <div class="card" style="margin-bottom:16px">
-    <div class="sec-title"><div class="dot" style="background:var(--puppy-blue)"></div>Log a Drive</div>
-    <div class="two-col">
-      <div class="ig" style="margin-bottom:0">
-        <div class="il">Miles</div>
-        <div class="iw">
-          <input type="number" id="pm-mi" placeholder="0.0" min="0" step="0.1" class="sp">
-          <span class="sfx">mi</span>
-        </div>
-      </div>
-      <div class="ig" style="margin-bottom:0">
-        <div class="il">Note (optional)</div>
-        <input type="text" id="pm-note" placeholder="Grocery run, appointment…">
-      </div>
-    </div>
-    <button class="btn-full btn-blue-full" id="btn-log-personal">🚗 Log Drive →</button>
-    <div style="margin-top:14px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div class="sec-title" style="margin-bottom:0"><div class="dot" style="background:var(--puppy-blue)"></div>Personal Miles This Month</div>
-        <span id="pm-total-lbl" style="font-size:12px;font-weight:700;color:var(--muted)">0 mi</span>
-      </div>
-      <div id="pm-log"><div class="log-empty">No personal trips yet</div></div>
-    </div>
-  </div>
 
   <!-- Income this month -->
   <div class="card">
@@ -696,7 +654,7 @@
       <button class="btn btn-purple-sm" id="btn-save-opening">Save</button>
     </div>
     <div class="income-row">
-      <span class="income-lbl">🚗 Gig take-home</span>
+      <span class="income-lbl">🚗 Gig gross</span>
       <span class="income-val" id="inc-gig">$0.00</span>
     </div>
     <div class="income-row">
@@ -739,11 +697,24 @@
   <div class="two-col">
     <div class="card" style="margin-bottom:0">
       <div class="sec-title"><div class="dot"></div>Log a Shift</div>
+      <!-- Step 1: save start odo before leaving -->
       <div class="ig">
         <div class="il" style="justify-content:space-between">
-          End Odometer
-          <span id="s-odo-start" style="font-size:10px;color:var(--muted);font-weight:600"></span>
+          Starting Odometer
+          <span id="shift-start-status" style="font-size:10px;font-weight:700;color:var(--green)"></span>
         </div>
+        <div style="display:flex;gap:8px">
+          <div class="iw" style="flex:1">
+            <input type="number" id="s-odo-start" placeholder="0" min="0" step="1" class="sp">
+            <span class="sfx">mi</span>
+          </div>
+          <button class="btn btn-ghost-sm" id="btn-save-start-odo" style="flex-shrink:0">Save</button>
+        </div>
+      </div>
+      <div style="height:1px;background:var(--border);margin:10px 0"></div>
+      <!-- Step 2: fill in after shift -->
+      <div class="ig">
+        <div class="il">Ending Odometer</div>
         <div class="iw">
           <input type="number" id="s-odo-end" placeholder="0" min="0" step="1" class="sp">
           <span class="sfx">mi</span>
@@ -869,7 +840,7 @@ const FIXED = 644;
 
 // ── App state ────────────────────────────────────────────────
 let uid     = null;
-let S       = { bank: 0, openingBalance: 0, odo: 0, tankPct: 0, lastGasPrice: 0, lastFillups: [], lastCarryOverMonth: '', savingsMigrated: false, savingsItems: [], customExpenses: [], shifts: [], paychecks: [], gasFillups: [], personalTrips: [], paidBills: [] };
+let S       = { openingBalance: 0, odo: 0, tankPct: 0, lastGasPrice: 0, lastFillups: [], shiftStartOdo: 0, lastCarryOverMonth: '', savingsMigrated: false, savingsItems: [], customExpenses: [], shifts: [], paychecks: [], gasFillups: [], personalTrips: [], paidBills: [] };
 let preview = null;
 
 function month() {
@@ -884,46 +855,43 @@ function prevMonth() {
 }
 
 // ── Derived ──────────────────────────────────────────────────
+const gigIncome  = () => S.shifts.reduce((a, s) => a + s.earn, 0);
+const payIncome  = () => S.paychecks.reduce((a, p) => a + p.amount, 0);
 const rentPaid   = () => Math.min(
   S.shifts.reduce((a, s) => a + (s.rentShare || 0), 0) +
   S.paychecks.reduce((a, p) => a + p.amount / 3, 0),
   RENT_CAP
 );
-const gigIncome  = () => S.shifts.reduce((a, s) => a + s.takeHome,  0);
-const payIncome  = () => S.paychecks.reduce((a, p) => a + p.amount, 0);
-const totalIn    = () => S.bank + S.openingBalance + gigIncome() + payIncome();
-const jar1Target    = () => FIXED + RENT_CAP;
-const totalExpenses = () =>
-  S.gasFillups.reduce((a, g) => a + g.total, 0) +
-  S.customExpenses.reduce((a, e) => a + e.amount, 0);
+const jar1Target      = () => FIXED + RENT_CAP;
+const income          = () => S.openingBalance + gigIncome() + payIncome();
+const savingsGoalTotal = () => S.savingsItems.reduce((a, i) => a + (i.target || 0), 0);
+
+// How much income is allocated to each jar
+const billsFunded   = () => Math.min(income(), jar1Target());
+const savingsFunded = () => Math.min(Math.max(0, income() - jar1Target()), savingsGoalTotal());
+const freeFunded    = () => Math.max(0, income() - jar1Target() - savingsGoalTotal());
+
+// What's been spent from each jar
+const billsPaidAmt  = () => (S.paidBills || []).reduce((a, name) => {
+  const b = BILLS.find(x => x.name === name);
+  return a + (b?.dynamic ? Math.min(rentPaid(), RENT_CAP) : (b?.amount || 0));
+}, 0);
+const billsSpent    = () => billsPaidAmt()
+  + S.gasFillups.reduce((a, g) => a + g.total, 0)
+  + S.customExpenses.filter(e => e.jar === 'bills').reduce((a, e) => a + e.amount, 0);
+const savingsSpent  = () => S.customExpenses.filter(e => e.jar === 'savings').reduce((a, e) => a + e.amount, 0);
+const freeSpent     = () => S.customExpenses.filter(e => e.jar === 'free').reduce((a, e) => a + e.amount, 0);
+
+// Actual jar balances
+const billsJar   = () => Math.max(0, billsFunded()   - billsSpent());
+const savingsJar = () => Math.max(0, savingsFunded() - savingsSpent());
+const freeJar    = () => Math.max(0, freeFunded()    - freeSpent());
+const totalBalance = () => billsJar() + savingsJar() + freeJar();
 
 function jarAmounts() {
   const t1        = jar1Target();
-  const tot       = totalIn();
-  const savTarget = savingsTarget();
-  const expenses  = totalExpenses();
-
-  // Fill order: bills → savings → free money
-  const grossBills = Math.min(tot, t1);
-  const afterBills = Math.max(0, tot - t1);
-  const grossSav   = Math.min(afterBills, savTarget);
-  const grossFree  = Math.max(0, afterBills - savTarget);
-
-  // Expense cascade (reverse): free money → savings → bills
-  let dispFree  = grossFree - expenses;
-  let dispSav   = grossSav;
-  let dispBills = grossBills;
-
-  if (dispFree < 0) {
-    dispSav = Math.max(0, grossSav + dispFree);
-    const savOverflow = grossSav + dispFree;
-    dispFree = 0;
-    if (savOverflow < 0) {
-      dispBills = Math.max(0, grossBills + savOverflow);
-    }
-  }
-
-  return { a1: dispBills, a2: dispFree, a3: dispSav, t1, savTarget };
+  const savTarget = savingsGoalTotal();
+  return { a1: billsJar(), a2: freeJar(), a3: savingsJar(), t1, savTarget };
 }
 
 // ── Firestore ────────────────────────────────────────────────
@@ -931,12 +899,12 @@ async function loadData() {
   const settSnap = await getDoc(doc(db, 'users', uid, 'data', 'settings'));
   if (settSnap.exists()) {
     const d = settSnap.data();
-    S.bank              = d.bank              || 0;
     S.openingBalance    = d.openingBalance    || 0;
     S.odo               = d.odo               || 0;
     S.tankPct           = d.tankPct           || 0;
     S.lastGasPrice      = d.lastGasPrice      || 0;
     S.lastFillups       = d.lastFillups       || [];
+    S.shiftStartOdo     = d.shiftStartOdo     || 0;
     S.savingsItems      = d.savingsItems      || [];
     S.savingsMigrated   = d.savingsMigrated   || false;
     S.lastCarryOverMonth = d.lastCarryOverMonth || '';
@@ -982,12 +950,12 @@ async function loadData() {
   }
 
   // Carry over from previous month — runs once per month even if current month doc exists
-  if (S.lastCarryOverMonth !== month()) {
+  if (S.lastCarryOverMonth !== month() || !S.openingBalance) {
     const prevSnap = await getDoc(doc(db, 'users', uid, 'months', prevMonth()));
     if (prevSnap.exists()) {
       const p = prevSnap.data();
-      const prevIncome   = (p.paychecks     || []).reduce((a, x) => a + x.amount,  0)
-                         + (p.shifts        || []).reduce((a, x) => a + x.takeHome, 0);
+      const prevIncome   = (p.paychecks     || []).reduce((a, x) => a + x.amount, 0)
+                         + (p.shifts        || []).reduce((a, x) => a + (x.earn || x.takeHome || 0), 0);
       const prevExpenses = (p.gasFillups     || []).reduce((a, x) => a + x.total,   0)
                          + (p.customExpenses || []).reduce((a, x) => a + x.amount,  0);
       const BILL_AMOUNTS = { Insurance:100, Storage:100, Phone:25, Claude:20, Netflix:10,
@@ -998,7 +966,7 @@ async function loadData() {
         a + (name === 'Rent' ? rentAmt : (BILL_AMOUNTS[name] || 0)), 0);
 
       const carryOver = prevIncome - prevExpenses - billsPaid;
-      S.bank = Math.max(0, +(S.bank + carryOver).toFixed(2));
+      S.openingBalance = Math.max(0, +carryOver.toFixed(2));
       S.lastCarryOverMonth = month();
       await saveSettings();
       toast(`🔄 Carried over ${fmt(Math.max(0, carryOver))} from last month`);
@@ -1010,8 +978,8 @@ async function saveSettings() {
   if (!uid) return;
   try {
     await setDoc(doc(db, 'users', uid, 'data', 'settings'), {
-    bank: S.bank, openingBalance: S.openingBalance,
-    odo: S.odo, tankPct: S.tankPct, lastGasPrice: S.lastGasPrice, lastFillups: S.lastFillups,
+    openingBalance: S.openingBalance,
+    odo: S.odo, tankPct: S.tankPct, lastGasPrice: S.lastGasPrice, lastFillups: S.lastFillups, shiftStartOdo: S.shiftStartOdo,
     savingsItems: S.savingsItems, lastCarryOverMonth: S.lastCarryOverMonth, savingsMigrated: S.savingsMigrated,
   });
   } catch (e) {
@@ -1042,18 +1010,11 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById('app').style.display          = 'block';
     await loadData();
     if (S.odo) document.getElementById('g-fillup-odo').value = S.odo;
-    if (S.bank) {
-      const bi = document.getElementById('bank-inp');
-      const bd = document.getElementById('bank-display');
-      if (bi) bi.value = S.bank;
-      if (bd) bd.textContent = fmt(S.bank);
-    }
     if (S.openingBalance) document.getElementById('opening-inp').value = S.openingBalance;
-    if (S.odo) {
-      document.getElementById('g-odo').value = S.odo;
-      document.getElementById('s-odo-start').textContent = `Start: ${S.odo.toLocaleString()} mi`;
+    if (S.odo) document.getElementById('g-fillup-odo').value = S.odo;
+    if (S.shiftStartOdo) {
+      document.getElementById('shift-start-status').textContent = 'saved ✓';
     }
-    if (S.tankPct) document.getElementById('g-tank').value  = S.tankPct;
     populateJarDecor();
     renderCustomExp();
     renderBills();
@@ -1076,10 +1037,7 @@ function calcShift() {
   const mpg    = autoMpg();
   const lastFillup = [...S.gasFillups].reverse().find(g => g.pricePer > 0);
   const gas    = lastFillup?.pricePer || S.lastGasPrice || 0;
-  const mi     = S.odo > 0 && odoEnd > S.odo ? +(odoEnd - S.odo).toFixed(1) : 0;
-
-  // Show start odometer label
-  document.getElementById('s-odo-start').textContent = S.odo > 0 ? `Start: ${S.odo.toLocaleString()} mi` : '';
+  const mi = S.shiftStartOdo > 0 && odoEnd > S.shiftStartOdo ? +(odoEnd - S.shiftStartOdo).toFixed(1) : 0;
 
   if (!earn) { document.getElementById('shift-preview').style.display = 'none'; preview = null; return; }
 
@@ -1109,13 +1067,12 @@ function logShift() {
     mi: preview.mi, earn: preview.earn, hrs: preview.hrs,
     gasCost: preview.gasCost, rentShare: preview.rentShare, takeHome: preview.takeHome,
   });
-  // Update odometer to end reading
-  if (preview.odoEnd > 0) {
-    S.odo = preview.odoEnd;
-    const odoEl = document.getElementById('g-odo');
-    if (odoEl) odoEl.value = S.odo;
-    saveSettings();
-  }
+  // Save end odo as new start for next shift, clear status
+  if (preview.odoEnd > 0) S.odo = preview.odoEnd;
+  S.shiftStartOdo = 0;
+  document.getElementById('s-odo-start').value = '';
+  document.getElementById('shift-start-status').textContent = '';
+  saveSettings();
   saveMonthData();
   ['s-odo-end','s-earn','s-hrs'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('shift-preview').style.display = 'none';
@@ -1220,14 +1177,6 @@ function renderGasLog() {
     : '<div class="log-empty">No fill-ups yet</div>';
 }
 
-function saveBank() {
-  S.bank = +(document.getElementById('bank-inp').value) || 0;
-  document.getElementById('bank-display').textContent = fmt(S.bank);
-  saveSettings();
-  refreshJars();
-  refreshIncome();
-  toast('🏦 Balance updated');
-}
 
 // ── Previous month bills ──────────────────────────────────────
 let _prevMonthData = null;
@@ -1266,20 +1215,25 @@ async function togglePrevBillPaid(name, amt) {
   const paid = _prevMonthData.paidBills || [];
   if (paid.includes(name)) {
     _prevMonthData.paidBills = paid.filter(n => n !== name);
-    S.bank = +(S.bank + amt).toFixed(2);
   } else {
     _prevMonthData.paidBills = [...paid, name];
-    S.bank = +Math.max(0, S.bank - amt).toFixed(2);
     soundCoin();
   }
-  document.getElementById('bank-inp').value           = S.bank;
-  document.getElementById('bank-display').textContent = fmt(S.bank);
   await setDoc(doc(db, 'users', uid, 'months', prevMonth()), _prevMonthData);
-  saveSettings();
   renderPrevBills();
+  refreshJars();
   toast(`${name} ${_prevMonthData.paidBills.includes(name) ? 'marked paid ✓' : 'unmarked'}`);
 }
 window.togglePrevBillPaid = togglePrevBillPaid;
+
+function saveShiftStartOdo() {
+  const val = +(document.getElementById('s-odo-start').value) || 0;
+  if (val <= 0) { toast('⚠️ Enter odometer reading first'); return; }
+  S.shiftStartOdo = val;
+  saveSettings();
+  document.getElementById('shift-start-status').textContent = 'saved ✓';
+  toast(`🚗 Start odometer saved — ${val.toLocaleString()} mi`);
+}
 
 function saveOpening() {
   S.openingBalance = +(document.getElementById('opening-inp').value) || 0;
@@ -1315,8 +1269,7 @@ function logPersonalTrip() {
 }
 
 function renderPersonalLog() {
-  const total = S.personalTrips.reduce((a, t) => a + t.miles, 0);
-  document.getElementById('pm-total-lbl').textContent = `${total.toFixed(1)} mi`;
+  if (!document.getElementById('pm-total-lbl')) return;
   const log = document.getElementById('pm-log');
   log.innerHTML = S.personalTrips.length
     ? [...S.personalTrips].reverse().slice(0, 8).map(t =>
@@ -1363,8 +1316,6 @@ function toggleBills() {
 // ── Rendering ────────────────────────────────────────────────
 function refreshAll(animate = true) { refreshJars(animate); refreshIncome(); renderLogs(); renderGasLog(); renderPersonalLog(); renderSavings(); }
 
-const savingsTotal  = () => S.savingsItems.filter(i => !i.completed).reduce((a, i) => a + (i.funded || 0), 0);
-const savingsTarget = () => S.savingsItems.filter(i => !i.completed).reduce((a, i) => a + (i.target || 0), 0);
 
 const _prevPct = { j1: 0, j2: 0, j3: 0 };
 
@@ -1405,8 +1356,7 @@ function refreshJars(animate = true) {
     pill3.style.display = 'none';
   }
 
-  // Update the bank display (auto-calculated)
-  document.getElementById('bank-display').textContent = fmt(S.bank);
+  document.getElementById('bank-display').textContent = fmt(totalBalance());
 
   if (!animate) { _prevPct.j1 = p1; _prevPct.j2 = p2; _prevPct.j3 = p3; return; }
 
@@ -1490,7 +1440,7 @@ function refreshIncome() {
   set('inc-opening', fmt(S.openingBalance));
   set('inc-gig',     fmt(gigIncome()));
   set('inc-pay',     fmt(payIncome()));
-  set('inc-total',   fmt(totalIn()));
+  set('inc-total',   fmt(gigIncome() + payIncome()));
 }
 
 function toggleBillPaid(name) {
@@ -1499,15 +1449,10 @@ function toggleBillPaid(name) {
 
   if (S.paidBills.includes(name)) {
     S.paidBills = S.paidBills.filter(n => n !== name);
-    S.bank = +(S.bank + amt).toFixed(2);
   } else {
     S.paidBills.push(name);
-    S.bank = +Math.max(0, S.bank - amt).toFixed(2);
     soundCoin();
   }
-
-  document.getElementById('bank-inp').value           = S.bank;
-  document.getElementById('bank-display').textContent = fmt(S.bank);
   saveMonthData();
   saveSettings();
   refreshJars();
@@ -1732,15 +1677,18 @@ function renderSavings() {
   }
   jarCard.style.display = 'flex';
 
+  // Distribute savingsJar() proportionally across goals by target
+  const savTotal = savingsJar();
+  const goalTotal = savingsGoalTotal();
   const activeHTML = active.map(i => {
-    const pct = i.target > 0 ? Math.min(100, Math.round((i.funded / i.target) * 100)) : 0;
+    const share = goalTotal > 0 ? savTotal * (i.target / goalTotal) : 0;
+    const pct   = i.target > 0 ? Math.min(100, Math.round((share / i.target) * 100)) : 0;
     return `<div class="savings-item">
       <div>
         <div class="savings-item-name">${i.name}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px">${fmt(i.funded)} of ${fmt(i.target)} — ${pct}%</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${fmt(share)} of ${fmt(i.target)} — ${pct}%</div>
       </div>
       <div class="savings-item-right">
-        <button class="btn btn-ghost-sm" style="font-size:11px;padding:4px 10px" onclick="fundSavingsGoal(${i.id})">+ Add</button>
         <button class="savings-del" onclick="deleteSavingsItem(${i.id})">✕</button>
       </div>
     </div>`;
@@ -1753,14 +1701,14 @@ function renderSavings() {
         <div class="savings-item" style="opacity:0.5">
           <div>
             <div class="savings-item-name" style="text-decoration:line-through">${i.name}</div>
-            <div style="font-size:11px;color:var(--muted)">${fmt(i.funded)} saved ✓</div>
+            <div style="font-size:11px;color:var(--muted)">${fmt(i.target)} ✓</div>
           </div>
           <button class="savings-del" onclick="deleteSavingsItem(${i.id})">✕</button>
         </div>`).join('')}
     </div>` : '';
 
   list.innerHTML = activeHTML + completedHTML;
-  set('savings-total', fmt(savingsTotal()));
+  set('savings-total', fmt(savTotal));
   totalRow.style.display = 'flex';
 }
 
@@ -1772,15 +1720,18 @@ window.deleteCustomExp    = deleteCustomExp;
 function addCustomExp() {
   const name = document.getElementById('ce-name').value.trim();
   const amt  = +(document.getElementById('ce-amt').value) || 0;
+  const jar  = document.getElementById('ce-jar').value || 'free';
   if (!name)   { toast('⚠️ Enter a name'); return; }
   if (amt <= 0) { toast('⚠️ Enter an amount'); return; }
-  S.customExpenses.push({ id: Date.now(), name, amount: amt });
+  S.customExpenses.push({ id: Date.now(), name, amount: amt, jar });
   saveMonthData();
   document.getElementById('ce-name').value = '';
   document.getElementById('ce-amt').value  = '';
+  document.getElementById('ce-jar').value  = 'free';
   renderCustomExp();
   refreshJars();
-  toast(`💸 ${name} — ${fmt(amt)} deducted`);
+  const jarLabel = { bills:'🧾 Bills', savings:'🐷 Savings', free:'✨ Free' }[jar];
+  toast(`💸 ${name} — ${fmt(amt)} from ${jarLabel}`);
 }
 
 function deleteCustomExp(id) {
@@ -1793,9 +1744,10 @@ function deleteCustomExp(id) {
 function renderCustomExp() {
   const list = document.getElementById('custom-exp-list');
   if (!S.customExpenses.length) { list.innerHTML = ''; return; }
+  const jarLabel = { bills:'🧾', savings:'🐷', free:'✨' };
   list.innerHTML = S.customExpenses.map(e => `
     <div class="savings-item">
-      <span class="savings-item-name">${e.name}</span>
+      <span class="savings-item-name">${jarLabel[e.jar] || '✨'} ${e.name}</span>
       <div class="savings-item-right">
         <span class="savings-item-amt">${fmt(e.amount)}</span>
         <button class="savings-del" onclick="deleteCustomExp(${e.id})">✕</button>
@@ -1805,19 +1757,17 @@ function renderCustomExp() {
 
 // ── Wire up events ───────────────────────────────────────────
 document.getElementById('btn-sign-in').addEventListener('click',  () => signInWithPopup(auth, provider).catch(() => toast('⚠️ Sign in failed')));
-document.getElementById('btn-bank').addEventListener('click', saveBank);
 document.getElementById('btn-sign-out').addEventListener('click', () => signOut(auth));
 document.getElementById('btn-log-shift').addEventListener('click', logShift);
 document.getElementById('btn-add-paycheck').addEventListener('click', addPaycheck);
 document.getElementById('bills-toggle').addEventListener('click', toggleBills);
+document.getElementById('btn-save-start-odo').addEventListener('click', saveShiftStartOdo);
 document.getElementById('s-odo-end').addEventListener('input', calcShift);
 document.getElementById('s-earn').addEventListener('input',  calcShift);
 document.getElementById('s-hrs').addEventListener('input',   calcShift);
 document.getElementById('g-gal').addEventListener('input',   calcGas);
 document.getElementById('g-ppg').addEventListener('input',   calcGas);
 document.getElementById('btn-log-gas').addEventListener('click', logGasFillup);
-document.getElementById('btn-save-tank').addEventListener('click', saveTankOdo);
-document.getElementById('btn-log-personal').addEventListener('click', logPersonalTrip);
 document.getElementById('btn-add-goal').addEventListener('click', addSavingsGoal);
 document.getElementById('btn-add-exp').addEventListener('click', addCustomExp);
 document.getElementById('btn-edit-opening').addEventListener('click', () => {

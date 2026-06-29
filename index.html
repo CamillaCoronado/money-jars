@@ -575,6 +575,14 @@
       </div>
       <div id="bills-this"></div>
       <div id="bills-prev" style="display:none"></div>
+      <div class="ig" style="margin:12px 0 0">
+        <div class="il">Pet food amount</div>
+        <div class="iw">
+          <span class="pfx">$</span>
+          <input type="number" id="pet-food-amt" placeholder="100" min="0" step="1" class="pp">
+        </div>
+      </div>
+      <button class="btn btn-ghost-sm" id="btn-save-pet-food" style="width:100%;padding:9px;margin-top:10px">Save Pet Food Amount</button>
     </div>
     <!-- Custom expenses -->
     <div style="padding:0 20px 16px; border-top:1px solid var(--border)">
@@ -838,7 +846,7 @@ const FIXED = 644;
 
 // ── App state ────────────────────────────────────────────────
 let uid     = null;
-let S       = { openingBalance: 0, odo: 0, tankPct: 0, lastGasPrice: 0, lastFillups: [], shiftStartOdo: 0, lastCarryOverMonth: '', savingsMigrated: false, savingsItems: [], customExpenses: [], shifts: [], paychecks: [], gasFillups: [], personalTrips: [], paidBills: [] };
+let S       = { openingBalance: 0, odo: 0, tankPct: 0, lastGasPrice: 0, lastFillups: [], shiftStartOdo: 0, lastCarryOverMonth: '', savingsMigrated: false, savingsItems: [], customExpenses: [], shifts: [], paychecks: [], gasFillups: [], personalTrips: [], paidBills: [], petFoodAmount: 100 };
 let preview = null;
 
 function month() {
@@ -870,9 +878,13 @@ const savingsFunded = () => Math.min(Math.max(0, income() - jar1Target()), savin
 const freeFunded    = () => Math.max(0, income() - jar1Target() - savingsGoalTotal());
 
 // What's been spent from each jar
+const billAmount = (name) => {
+  if (name === 'Pet food') return S.petFoodAmount || 100;
+  return BILLS.find(x => x.name === name)?.amount || 0;
+};
 const billsPaidAmt  = () => (S.paidBills || []).reduce((a, name) => {
   const b = BILLS.find(x => x.name === name);
-  return a + (b?.dynamic ? Math.min(rentPaid(), RENT_CAP) : (b?.amount || 0));
+  return a + (b?.dynamic ? Math.min(rentPaid(), RENT_CAP) : billAmount(name));
 }, 0);
 const billsSpent    = () => billsPaidAmt()
   + S.gasFillups.reduce((a, g) => a + g.total, 0)
@@ -906,6 +918,7 @@ async function loadData() {
     S.savingsItems      = d.savingsItems      || [];
     S.savingsMigrated   = d.savingsMigrated   || false;
     S.lastCarryOverMonth = d.lastCarryOverMonth || '';
+    S.petFoodAmount     = d.petFoodAmount     || 100;
   }
   const mSnap = await getDoc(doc(db, 'users', uid, 'months', month()));
   if (mSnap.exists()) {
@@ -979,6 +992,7 @@ async function saveSettings() {
     openingBalance: S.openingBalance,
     odo: S.odo, tankPct: S.tankPct, lastGasPrice: S.lastGasPrice, lastFillups: S.lastFillups, shiftStartOdo: S.shiftStartOdo,
     savingsItems: S.savingsItems, lastCarryOverMonth: S.lastCarryOverMonth, savingsMigrated: S.savingsMigrated,
+    petFoodAmount: S.petFoodAmount,
   });
   } catch (e) {
     console.error('saveSettings failed:', e);
@@ -1195,7 +1209,7 @@ function renderPrevBills() {
              + (_prevMonthData.paychecks||[]).reduce((a,p)=>a+p.amount/3,0);
   el.innerHTML = BILLS.map(b => {
     const isPaid = paid.includes(b.name);
-    const amt    = b.dynamic ? Math.min(rp, RENT_CAP) : b.amount;
+    const amt    = b.dynamic ? Math.min(rp, RENT_CAP) : billAmount(b.name);
     return `<div class="bill-row ${isPaid ? 'paid' : ''}" onclick="togglePrevBillPaid('${b.name}',${amt})">
       <div class="bill-left">
         <div class="bill-check">${isPaid ? '✓' : ''}</div>
@@ -1238,6 +1252,16 @@ function saveOpening() {
   refreshJars();
   refreshIncome();
   toast('📅 Prior income saved');
+}
+
+function savePetFoodAmount() {
+  const input = document.getElementById('pet-food-amt');
+  if (!input) return;
+  const amt = +(input.value) || 0;
+  S.petFoodAmount = amt > 0 ? amt : 100;
+  saveSettings();
+  renderBills();
+  toast(`🐾 Pet food amount saved — ${fmt(S.petFoodAmount)}`);
 }
 
 function saveTankOdo() {
@@ -1494,7 +1518,7 @@ function renderBills() {
         <div class="bill-check">${paid ? '✓' : ''}</div>
         <span>${b.emoji}</span><span class="bill-name">${b.name}</span>
       </div>
-      <span class="bill-amt">${fmt(b.amount)}</span>
+      <span class="bill-amt">${fmt(billAmount(b.name))}</span>
     </div>`;
   }).join('');
   const paidCount = S.paidBills.length;
@@ -1503,6 +1527,8 @@ function renderBills() {
       <span>Monthly total <span style="font-size:11px;color:var(--muted);font-weight:600">${paidCount}/${BILLS.length} paid</span></span>
       <span>${fmt(jar1Target())}</span>
     </div>`;
+  const petFoodInput = document.getElementById('pet-food-amt');
+  if (petFoodInput) petFoodInput.value = S.petFoodAmount || 100;
 }
 
 window.toggleBillPaid = toggleBillPaid;
@@ -1805,6 +1831,7 @@ document.getElementById('s-hrs').addEventListener('input',   calcShift);
 document.getElementById('g-gal').addEventListener('input',   calcGas);
 document.getElementById('g-ppg').addEventListener('input',   calcGas);
 document.getElementById('btn-log-gas').addEventListener('click', logGasFillup);
+document.getElementById('btn-save-pet-food').addEventListener('click', savePetFoodAmount);
 document.getElementById('btn-add-goal').addEventListener('click', addSavingsGoal);
 document.getElementById('btn-add-exp').addEventListener('click', addCustomExp);
 </script>

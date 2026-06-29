@@ -880,6 +880,10 @@ const freeFunded    = () => Math.max(0, income() - jar1Target() - savingsGoalTot
 // What's been spent from each jar
 const billAmount = (name) => {
   if (name === 'Pet food') return S.petFoodAmount || 100;
+  if (name === 'Gas') {
+    const total = (S.gasFillups || []).reduce((a, g) => a + g.total, 0);
+    return total > 0 ? total : 161;
+  }
   return BILLS.find(x => x.name === name)?.amount || 0;
 };
 const billsPaidAmt  = () => (S.paidBills || []).reduce((a, name) => {
@@ -892,10 +896,13 @@ const billsSpent    = () => billsPaidAmt()
 const savingsSpent  = () => S.customExpenses.filter(e => e.jar === 'savings').reduce((a, e) => a + e.amount, 0);
 const freeSpent     = () => S.customExpenses.filter(e => e.jar === 'free').reduce((a, e) => a + e.amount, 0);
 
+const billsOverflow = () => Math.max(0, billsSpent() - billsFunded());
+const freeOverflow  = () => Math.max(0, freeSpent() + billsOverflow() - freeFunded());
+
 // Actual jar balances
 const billsJar   = () => Math.max(0, billsFunded()   - billsSpent());
-const savingsJar = () => Math.max(0, savingsFunded() - savingsSpent());
-const freeJar    = () => Math.max(0, freeFunded()    - freeSpent());
+const freeJar    = () => Math.max(0, freeFunded()    - freeSpent() - billsOverflow());
+const savingsJar = () => Math.max(0, savingsFunded() - savingsSpent() - freeOverflow());
 const totalBalance = () => billsJar() + savingsJar() + freeJar();
 
 function jarAmounts() {
@@ -1209,7 +1216,9 @@ function renderPrevBills() {
              + (_prevMonthData.paychecks||[]).reduce((a,p)=>a+p.amount/3,0);
   el.innerHTML = BILLS.map(b => {
     const isPaid = paid.includes(b.name);
-    const amt    = b.dynamic ? Math.min(rp, RENT_CAP) : billAmount(b.name);
+    const amt    = b.dynamic ? Math.min(rp, RENT_CAP) : (b.name === 'Gas'
+      ? (_prevMonthData.gasFillups || []).reduce((a, g) => a + g.total, 0) || 161
+      : billAmount(b.name));
     return `<div class="bill-row ${isPaid ? 'paid' : ''}" onclick="togglePrevBillPaid('${b.name}',${amt})">
       <div class="bill-left">
         <div class="bill-check">${isPaid ? '✓' : ''}</div>
@@ -1354,17 +1363,27 @@ function refreshJars(animate = true) {
   const prev1 = _prevPct.j1, prev2 = _prevPct.j2, prev3 = _prevPct.j3;
 
   // Bottom section: fixed bills (capped at 58.9% of jar)
-  const fixedPct = Math.min(p1, (FIXED / jar1Target()) * 100);
-  setFill('j1-fill', fixedPct);
-  // Top section: rent (fills from 0→41.1% within its zone)
-  const rentAmt   = Math.min(rentPaid(), RENT_CAP);
-  const rentPct   = (rentAmt / RENT_CAP) * (RENT_CAP / jar1Target()) * 100;
-  document.getElementById('j1-fill-rent').style.height = `${rentPct}%`;
-  const rentDisplay  = Math.min(rentAmt, RENT_CAP);
-  const fixedDisplay = Math.min(Math.max(0, a1 - rentDisplay), FIXED);
-  set('j1-rent',      fmt(rentDisplay));
-  set('j1-fixed-amt', fmt(fixedDisplay));
-  set('j1-pill',      `${Math.round(p1)}% covered`);
+  const fixedCapacityPct = (FIXED / jar1Target()) * 100;
+  const rentCapacityPct  = (RENT_CAP / jar1Target()) * 100;
+  const rentAmt          = Math.min(rentPaid(), RENT_CAP);
+  const rentRemaining    = S.paidBills.includes('Rent') ? 0 : Math.min(a1, rentAmt);
+  const fixedRemaining   = Math.min(Math.max(0, a1 - rentRemaining), FIXED);
+
+  setFill('j1-fill-rent', (rentRemaining / RENT_CAP) * rentCapacityPct);
+  setFill('j1-fill',      (fixedRemaining / FIXED) * fixedCapacityPct);
+  set('j1-rent',      fmt(rentRemaining));
+  set('j1-fixed-amt', fmt(fixedRemaining));
+
+  const allBillsPaid = S.paidBills.length === BILLS.length;
+  if (allBillsPaid) {
+    set('j1-pill', '✓ bills paid');
+  } else if (S.paidBills.includes('Rent')) {
+    set('j1-pill', '✓ rent paid');
+  } else if (a1 > 0) {
+    set('j1-pill', `${Math.round(p1)}% covered`);
+  } else {
+    set('j1-pill', '0% covered');
+  }
 
   setFill('j2-fill', p2);
   set('j2-amt', fmt(a2));
@@ -1474,7 +1493,7 @@ function refreshIncome() {
 
 function toggleBillPaid(name) {
   const bill = BILLS.find(b => b.name === name);
-  const amt  = bill?.dynamic ? Math.min(rentPaid(), RENT_CAP) : (bill?.amount || 0);
+  const amt  = bill?.dynamic ? Math.min(rentPaid(), RENT_CAP) : billAmount(name);
 
   if (S.paidBills.includes(name)) {
     S.paidBills = S.paidBills.filter(n => n !== name);

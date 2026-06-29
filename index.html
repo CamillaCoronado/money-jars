@@ -367,6 +367,10 @@
       font-size: 11px; transition: all .15s;
     }
     .bill-row.paid .bill-check { background: var(--green); border-color: var(--green); color: #fff; }
+    .bill-row.bill-info { cursor: default; opacity: 0.95; }
+    .bill-row.bill-info .bill-left { color: var(--text); }
+    .bill-row.bill-info .bill-check { display: none; }
+    .bill-row.bill-info .bill-name::after { content: ' · informational'; font-size: 11px; color: var(--muted); margin-left: 4px; font-weight: 400; }
     .bill-amt { font-weight: 700; }
     .bill-dyn { color: var(--primary); font-size: 12px; font-weight: 700; }
     .bills-total {
@@ -541,7 +545,7 @@
       <div class="jar-info">
         <div class="jar-name">✨ Free Money</div>
         <div class="jar-amt" id="j2-amt">$0</div>
-        <div class="jar-sub">yours to keep</div>
+        <div class="jar-sub" id="j2-sub">yours to keep</div>
         <span class="jar-pill" id="j2-pill" style="display:none">0%</span>
       </div>
     </div>
@@ -897,12 +901,15 @@ const savingsSpent  = () => S.customExpenses.filter(e => e.jar === 'savings').re
 const freeSpent     = () => S.customExpenses.filter(e => e.jar === 'free').reduce((a, e) => a + e.amount, 0);
 
 const billsOverflow = () => Math.max(0, billsSpent() - billsFunded());
-const freeOverflow  = () => Math.max(0, freeSpent() + billsOverflow() - freeFunded());
+const freeAvailable = () => Math.max(0, freeFunded() - freeSpent());
+const savingsAvailable = () => Math.max(0, savingsFunded() - savingsSpent());
+const freeReserve = () => Math.min(billsOverflow(), freeAvailable());
+const savingsReserve = () => Math.min(Math.max(0, billsOverflow() - freeAvailable()), savingsAvailable());
 
 // Actual jar balances
-const billsJar   = () => Math.max(0, billsFunded()   - billsSpent());
-const freeJar    = () => Math.max(0, freeFunded()    - freeSpent() - billsOverflow());
-const savingsJar = () => Math.max(0, savingsFunded() - savingsSpent() - freeOverflow());
+const billsJar   = () => Math.max(0, billsFunded()   - billsSpent()) + freeReserve() + savingsReserve();
+const freeJar    = () => Math.max(0, freeAvailable()  - freeReserve());
+const savingsJar = () => Math.max(0, savingsAvailable() - savingsReserve());
 const totalBalance = () => billsJar() + savingsJar() + freeJar();
 
 function jarAmounts() {
@@ -1219,7 +1226,9 @@ function renderPrevBills() {
     const amt    = b.dynamic ? Math.min(rp, RENT_CAP) : (b.name === 'Gas'
       ? (_prevMonthData.gasFillups || []).reduce((a, g) => a + g.total, 0) || 161
       : billAmount(b.name));
-    return `<div class="bill-row ${isPaid ? 'paid' : ''}" onclick="togglePrevBillPaid('${b.name}',${amt})">
+    const rowClass = `bill-row ${isPaid ? 'paid' : ''}${b.name === 'Gas' ? ' bill-info' : ''}`;
+    const rowAction = b.name === 'Gas' ? '' : ` onclick="togglePrevBillPaid('${b.name}',${amt})"`;
+    return `<div class="${rowClass}"${rowAction}>
       <div class="bill-left">
         <div class="bill-check">${isPaid ? '✓' : ''}</div>
         <span>${b.emoji}</span><span class="bill-name">${b.name}</span>
@@ -1385,13 +1394,21 @@ function refreshJars(animate = true) {
     set('j1-pill', '0% covered');
   }
 
+  const billReserve = billsOverflow();
   setFill('j2-fill', p2);
   set('j2-amt', fmt(a2));
+  const j2Sub = document.getElementById('j2-sub');
   const pill2 = document.getElementById('j2-pill');
-  if (a2 > 0) {
+  if (billReserve > 0) {
+    j2Sub.textContent = 'reserved for bills';
+    pill2.style.display = 'inline-block';
+    pill2.textContent = `Reserved ${fmt(billReserve)} for bills`;
+  } else if (a2 > 0) {
+    j2Sub.textContent = 'yours to keep';
     pill2.style.display = 'inline-block';
     pill2.textContent = a2 >= t1 ? '🎉 overflowing!' : `${Math.round(p2)}% of bills extra`;
   } else {
+    j2Sub.textContent = 'yours to keep';
     pill2.style.display = 'none';
   }
 
@@ -1492,6 +1509,7 @@ function refreshIncome() {
 }
 
 function toggleBillPaid(name) {
+  if (name === 'Gas') return;
   const bill = BILLS.find(b => b.name === name);
   const amt  = bill?.dynamic ? Math.min(rentPaid(), RENT_CAP) : billAmount(name);
 
@@ -1523,20 +1541,18 @@ function renderBills() {
   const rp = rentPaid();
   const rows = BILLS.map(b => {
     const paid = S.paidBills.includes(b.name);
+    const rowClass = `bill-row ${paid ? 'paid' : ''}${b.name === 'Gas' ? ' bill-info' : ''}`;
+    const billCheck = `<div class="bill-check">${paid ? '✓' : ''}</div>`;
+    const billLeft = `<div class="bill-left">${billCheck}<span>${b.emoji}</span><span class="bill-name">${b.name}</span></div>`;
+    const rowAction = b.name === 'Gas' ? '' : ` onclick="toggleBillPaid('${b.name}')"`;
     if (b.dynamic) {
-      return `<div class="bill-row ${paid ? 'paid' : ''}" onclick="toggleBillPaid('${b.name}')">
-        <div class="bill-left">
-          <div class="bill-check">${paid ? '✓' : ''}</div>
-          <span>${b.emoji}</span><span class="bill-name">${b.name}</span>
-        </div>
+      return `<div class="${rowClass}"${rowAction}>
+        ${billLeft}
         <span class="bill-amt"><span class="bill-dyn">${fmt(Math.min(rp, RENT_CAP))}</span> / ${fmt(RENT_CAP)} cap</span>
       </div>`;
     }
-    return `<div class="bill-row ${paid ? 'paid' : ''}" onclick="toggleBillPaid('${b.name}')">
-      <div class="bill-left">
-        <div class="bill-check">${paid ? '✓' : ''}</div>
-        <span>${b.emoji}</span><span class="bill-name">${b.name}</span>
-      </div>
+    return `<div class="${rowClass}"${rowAction}>
+      ${billLeft}
       <span class="bill-amt">${fmt(billAmount(b.name))}</span>
     </div>`;
   }).join('');

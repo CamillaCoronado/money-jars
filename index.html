@@ -1139,7 +1139,8 @@ function logGasFillup() {
   // Update saved odometer and auto-recalculate MPG
   if (odo > 0) {
     S.odo = odo;
-    document.getElementById('g-odo').value = S.odo;
+    const fillupOdoInput = document.getElementById('g-fillup-odo');
+    if (fillupOdoInput) fillupOdoInput.value = S.odo;
     document.getElementById('s-odo-start').textContent = `Start: ${S.odo.toLocaleString()} mi`;
   }
   const mpg = autoMpg();
@@ -1240,8 +1241,10 @@ function saveOpening() {
 }
 
 function saveTankOdo() {
-  S.odo     = +(document.getElementById('g-odo').value)   || 0;
-  S.tankPct = +(document.getElementById('g-tank').value)  || 0;
+  const odoInput = document.getElementById('g-odo');
+  const tankInput = document.getElementById('g-tank');
+  S.odo     = odoInput  ? +(odoInput.value)   || S.odo || 0 : S.odo || 0;
+  S.tankPct = tankInput ? +(tankInput.value)  || S.tankPct || 0 : S.tankPct || 0;
   saveSettings();
   toast(`💾 Odometer ${S.odo.toLocaleString()} mi · Tank ${S.tankPct}%`);
 }
